@@ -708,15 +708,84 @@
       margin: 2rem 0 1rem 0;
     }
 
-    @media (max-width: 768px) {
-      .question-section {
-	grid-template-columns: 1fr 2fr 1fr;  /* DAR = RECEBER */
-        gap: 1rem;
-      }
-
-      .response-row {
-       grid-template-columns: 1fr 2fr 1fr;  /* DAR = RECEBER */
-      }
+   @media (max-width: 768px) {
+  .response-row {
+    display: block;
+    padding: 0;
+    background: transparent;
+    border: none;
+  }
+  
+  .dar-row, .receber-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 12px;
+    border: 2px solid;
+  }
+  
+  .dar-row {
+    background: rgba(231, 76, 60, 0.1);
+    border-color: #e74c3c;
+  }
+  
+  .receber-row {
+    background: rgba(39, 174, 96, 0.1);
+    border-color: #27ae60;
+  }
+  
+  .response-text {
+    text-align: center;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  
+  /* Cores das alternativas no mobile */
+  .response-row[data-resposta="N/A"] .dar-row,
+  .response-row[data-resposta="N/A"] .receber-row {
+    background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+    border-color: #95a5a6;
+  }
+  
+  .response-row[data-resposta="Nunca experimentei"] .dar-row,
+  .response-row[data-resposta="Nunca experimentei"] .receber-row {
+    background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
+    border-color: #bdc3c7;
+  }
+  
+  .response-row[data-resposta="Adoro"] .dar-row,
+  .response-row[data-resposta="Adoro"] .receber-row {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    border-color: #27ae60;
+  }
+  
+  .response-row[data-resposta="Aproveito"] .dar-row,
+  .response-row[data-resposta="Aproveito"] .receber-row {
+    background: linear-gradient(135deg, #58d68d 0%, #82e0aa 100%);
+    border-color: #58d68d;
+  }
+  
+  .response-row[data-resposta="Aceito"] .dar-row,
+  .response-row[data-resposta="Aceito"] .receber-row {
+    background: linear-gradient(135deg, #f7dc6f 0%, #f4d03f 100%);
+    border-color: #f7dc6f;
+  }
+  
+  .response-row[data-resposta="Tolero"] .dar-row,
+  .response-row[data-resposta="Tolero"] .receber-row {
+    background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+    border-color: #e67e22;
+  }
+  
+  .response-row[data-resposta="Limite rígido"] .dar-row,
+  .response-row[data-resposta="Limite rígido"] .receber-row {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    border-color: #e74c3c;
+  }
+}
 
    .toggle-group {
         grid-template-columns: 1fr;
