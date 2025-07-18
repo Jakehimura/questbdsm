@@ -708,36 +708,28 @@
       margin: 2rem 0 1rem 0;
     }
 
-  @media (max-width: 768px) {
-  .question-header {
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 0.5rem;
-    padding: 0.8rem;
-  }
-  
-  .column-header {
-    font-size: 0.9rem;
-    padding: 0.6rem 0.3rem;
-  }
-  
-  .response-row {
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 0.5rem;
-    padding: 0.6rem;
-  }
-  
-  .response-text {
-    font-size: 0.9rem;
-    text-align: center;
-  }
-  
-  .response-switch {
-    width: 45px;
-    height: 22px;
-  }
-  }
+    @media (max-width: 768px) {
+      .question-section {
+	grid-template-columns: 1fr 2fr 1fr;  /* DAR = RECEBER */
+        gap: 1rem;
+      }
 
-        
+      .response-row {
+       grid-template-columns: 1fr 2fr 1fr;  /* DAR = RECEBER */
+      }
+
+   .toggle-group {
+        grid-template-columns: 1fr;
+      }
+      
+      .navigation-buttons {
+        flex-direction: column;
+      }
+      
+      .nav-btn {
+        max-width: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1110,15 +1102,11 @@
       if (respostaReceberAtual === resposta) {
         receberInput.checked = true;
       }
-       } 
-      else {
-  //linha única
-  responseRow.appendChild(darSwitch);
-  responseRow.appendChild(responseText);
-  responseRow.appendChild(receberSwitch);
-}
-
-container.appendChild(responseRow);
+      
+      // Montar a linha
+      responseRow.appendChild(darSwitch);
+      responseRow.appendChild(responseText);
+      responseRow.appendChild(receberSwitch);
       
       container.appendChild(responseRow);
     });
