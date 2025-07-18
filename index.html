@@ -1042,32 +1042,35 @@ function verificarBotaoProximo() {
       }, 500);
     }
   }
+}
 
-  function proximaPergunta() {
-    if (!respostaDarAtual || !respostaReceberAtual) {
-      return; // Não fazer nada se não houver respostas completas
-    }
-    voltouPergunta = false;
+function proximaPergunta() {
+  if (!respostaDarAtual || !respostaReceberAtual) {
+    return;
+  }
+  
+  voltouPergunta = false;
   const btnProximo = document.querySelector('.btn-proximo');
   if (btnProximo) {
     btnProximo.remove();
   }
-    const atual = listaPerguntas[indice];
-    respostasUsuario[indice] = {
-      categoria: atual.categoria,
-      pergunta: atual.texto,
-      dar: respostaDarAtual,
-      receber: respostaReceberAtual
-    };
-    
-    indice++;
-    
-    if (indice < listaPerguntas.length) {
-      mostrarPergunta();
-    } else {
-      mostrarResultado();
-    }
+  
+  const atual = listaPerguntas[indice];
+  respostasUsuario[indice] = {
+    categoria: atual.categoria,
+    pergunta: atual.texto,
+    dar: respostaDarAtual,
+    receber: respostaReceberAtual
+  };
+  
+  indice++;
+  
+  if (indice < listaPerguntas.length) {
+    mostrarPergunta();
+  } else {
+    mostrarResultado();
   }
+}
 
   function anteriorPergunta() {
     if (indice > 0) {
