@@ -1103,10 +1103,39 @@
         receberInput.checked = true;
       }
       
-      // Montar a linha
-      responseRow.appendChild(darSwitch);
-      responseRow.appendChild(responseText);
-      responseRow.appendChild(receberSwitch);
+      // Detectar se é mobile
+const isMobile = window.innerWidth <= 768;
+
+if (isMobile) {
+  // Layout mobile - cards separados
+  const darRow = document.createElement('div');
+  darRow.className = 'dar-row';
+  darRow.innerHTML = `<span style="color: #e74c3c; font-weight: bold;">🔥 DAR</span>`;
+  const darText = document.createElement('span');
+  darText.className = 'response-text';
+  darText.textContent = resposta;
+  darRow.appendChild(darText);
+  darRow.appendChild(darSwitch);
+  
+  const receberRow = document.createElement('div');
+  receberRow.className = 'receber-row';
+  receberRow.innerHTML = `<span style="color: #27ae60; font-weight: bold;">💖 RECEBER</span>`;
+  const receberText = document.createElement('span');
+  receberText.className = 'response-text';
+  receberText.textContent = resposta;
+  receberRow.appendChild(receberText);
+  receberRow.appendChild(receberSwitch);
+  
+  responseRow.appendChild(darRow);
+  responseRow.appendChild(receberRow);
+} else {
+  // Layout desktop - linha única
+  responseRow.appendChild(darSwitch);
+  responseRow.appendChild(responseText);
+  responseRow.appendChild(receberSwitch);
+}
+
+container.appendChild(responseRow);
       
       container.appendChild(responseRow);
     });
