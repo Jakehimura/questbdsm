@@ -188,128 +188,151 @@
     }
 
     .question-section {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
       margin-top: 2rem;
     }
 
-    .question-group {
+    .question-header {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 1rem;
       background: rgba(255, 255, 255, 0.8);
-      padding: 1.5rem;
       border-radius: 12px;
       border: 2px solid #e0e0e0;
     }
 
-    .dark .question-group {
+    .dark .question-header {
       background: rgba(52, 73, 94, 0.8);
       border-color: #7f8c8d;
     }
 
-    .question-group h3 {
-      margin-bottom: 1rem;
-      color: #2c3e50;
-      font-size: 1.3rem;
+    .column-header {
       text-align: center;
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 1.3rem;
+      padding: 0.8rem;
+      border-radius: 8px;
     }
 
-    .dark .question-group h3 {
-      color: #ecf0f1;
+    .dar-header {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      color: white;
     }
 
-    .question-group.dar h3 {
-      color: #e74c3c;
+    .receber-header {
+      background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+      color: white;
     }
 
-    .question-group.receber h3 {
-      color: #27ae60;
-    }
-
-    .question-buttons {
+    .question-responses {
       display: flex;
       flex-direction: column;
       gap: 0.8rem;
     }
 
-    .question-buttons button {
-      padding: 0.8rem 1.2rem;
-      border: 2px solid #e0e0e0;
+    .response-row {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.8rem;
+      background: rgba(255, 255, 255, 0.8);
       border-radius: 8px;
-      background: white;
-      cursor: pointer;
+      border: 2px solid #e0e0e0;
       transition: all 0.3s ease;
-      font-weight: 500;
     }
 
-    .question-buttons button:hover {
-      background: #f8f9fa;
-      transform: translateX(5px);
+    .dark .response-row {
+      background: rgba(52, 73, 94, 0.8);
+      border-color: #7f8c8d;
     }
 
-    /* Gradiente de semáforo para as respostas */
-    .question-buttons button[data-resposta="N/A"] {
-      background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
-      color: white;
-      border-color: #95a5a6;
+    .response-row:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
-    .question-buttons button[data-resposta="Nunca experimentei"] {
-      background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+    .response-text {
+      text-align: center;
+      font-weight: 600;
       color: #2c3e50;
-      border-color: #bdc3c7;
+      font-size: 1rem;
     }
 
-    .question-buttons button[data-resposta="Adoro"] {
-      background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-      color: white;
+    .dark .response-text {
+      color: #ecf0f1;
+    }
+
+    .response-switch {
+      position: relative;
+      width: 50px;
+      height: 25px;
+      margin: 0 auto;
+    }
+
+    .response-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+   .response-slider {
+  position: relative;
+  cursor: pointer;
+      display: inline-block;
+      width: 50px;
+      height: 25px;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #e0e0e0;
+      transition: 0.3s;
+      border-radius: 15px;
+      border: 2px solid #bdc3c7;
+    }
+
+.response-slider:before {
+  position: absolute;
+  content: "";
+      top: 2px;
+      left: 2px;
+      width: 17px;
+      height: 17px;
+      background: white;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    input:checked + .response-slider {
+      background-color: #27ae60;
       border-color: #27ae60;
     }
 
-    .question-buttons button[data-resposta="Aproveito"] {
-      background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-      color: white;
-      border-color: #2ecc71;
+    input:checked + .response-slider:before {
+      transform: translateX(21px);
     }
 
-    .question-buttons button[data-resposta="Aceito"] {
-      background: linear-gradient(135deg, #f4d03f 0%, #f7dc6f 100%);
-      color: #2c3e50;
-      border-color: #f4d03f;
-    }
-
-    .question-buttons button[data-resposta="Tolero"] {
-      background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
-      color: white;
-      border-color: #e67e22;
-    }
-
-    .question-buttons button[data-resposta="Limite rígido"] {
-      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-      color: white;
+    .dar-switch input:checked + .response-slider {
+      background-color: #e74c3c;
       border-color: #e74c3c;
     }
 
-    .question-buttons button.selected {
-      transform: scale(1.05);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-      border-width: 3px;
+    .receber-switch input:checked + .response-slider {
+      background-color: #27ae60;
+      border-color: #27ae60;
     }
 
-    /* Correção para modo escuro - manter cores do gradiente */
-    .dark .question-buttons button {
-      /* Manter as cores do gradiente mesmo no modo escuro */
+    .dark .response-slider {
+      background-color: #34495e;
+      border-color: #7f8c8d;
     }
 
-    .dark .question-buttons button:hover {
-      background: rgba(52, 73, 94, 0.8);
-      transform: translateX(5px);
-    }
-
-    .dark .question-buttons button.selected {
-      transform: scale(1.05);
-      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
-      border-width: 3px;
+    .dark .response-slider:before {
+      background-color: #ecf0f1;
     }
 
     .progress-container {
@@ -408,6 +431,94 @@
       background-clip: text;
     }
 
+    .navigation-buttons {
+      display: flex;
+      justify-content: center;
+      margin-top: 2rem;
+      gap: 1rem;
+    }
+
+    .nav-btn {
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      max-width: 200px;
+    }
+
+    .btn-anterior {
+      background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+      color: white;
+    }
+
+    .btn-anterior:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(149, 165, 166, 0.4);
+    }
+
+    .toggle-field {
+      margin-top: 0.5rem;
+    }
+
+    .slide-toggle {
+      margin-bottom: 1rem;
+    }
+
+    .slide-toggle input[type="checkbox"] {
+      display: none;
+    }
+
+    .slider {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 25px;
+      background: #e0e0e0;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid #bdc3c7;
+    }
+
+    .slider::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 17px;
+      height: 17px;
+      background: white;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .slide-toggle input[type="checkbox"]:checked + .slider {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-color: #667eea;
+    }
+
+    .slide-toggle input[type="checkbox"]:checked + .slider::before {
+      transform: translateX(21px);
+    }
+
+    .dark .slider {
+      background: #34495e;
+      border-color: #7f8c8d;
+    }
+
+    .dark .slider::before {
+      background: #ecf0f1;
+    }
+
+    .dark .slide-toggle input[type="checkbox"]:checked + .slider {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      border-color: #3498db;
+    }
+
     .resultados {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
@@ -447,7 +558,6 @@
       font-weight: 600;
     }
 
-    /* Gradiente semáforo para títulos das colunas */
     th[data-resposta="Nunca experimentei"] {
       background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
     }
@@ -477,7 +587,6 @@
       background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     }
 
-    /* Manter cores específicas no modo escuro também */
     .dark th[data-resposta="Nunca experimentei"] {
       background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
     }
@@ -501,128 +610,6 @@
 
     .dark th[data-resposta="Limite rígido"] {
       background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-    }
-
-    .navigation-buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 2rem;
-      gap: 1rem;
-    }
-
-    .nav-btn {
-      padding: 1rem 2rem;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      flex: 1;
-      max-width: 200px;
-    }
-
-    .btn-anterior {
-      background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
-      color: white;
-    }
-
-    .btn-anterior:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(149, 165, 166, 0.4);
-    }
-
-    .btn-proximo {
-      background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-      color: white;
-    }
-
-    .btn-proximo:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
-    }
-
-    .btn-proximo:disabled {
-      background: #bdc3c7;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
-    .toggle-field {
-      margin-top: 0.5rem;
-    }
-
-    .slide-toggle {
-      margin-bottom: 1rem;
-    }
-
-    .slide-toggle input[type="checkbox"] {
-      display: none;
-    }
-
-    .slider {
-      position: relative;
-      display: inline-block;
-      width: 60px;
-      height: 30px;
-      background: #e0e0e0;
-      border-radius: 15px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border: 2px solid #bdc3c7;
-    }
-
-    .slider::before {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 24px;
-      height: 24px;
-      background: white;
-      border-radius: 50%;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    }
-
-    .slide-toggle input[type="checkbox"]:checked + .slider {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-color: #667eea;
-    }
-
-    .slide-toggle input[type="checkbox"]:checked + .slider::before {
-      transform: translateX(30px);
-    }
-
-    .slider::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      right: 8px;
-      transform: translateY(-50%);
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: #bdc3c7;
-      transition: all 0.3s ease;
-    }
-
-    .slide-toggle input[type="checkbox"]:checked + .slider::after {
-      color: white;
-    }
-
-    .dark .slider {
-      background: #34495e;
-      border-color: #7f8c8d;
-    }
-
-    .dark .slider::before {
-      background: #ecf0f1;
-    }
-
-    .dark .slide-toggle input[type="checkbox"]:checked + .slider {
-      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-      border-color: #3498db;
     }
 
     .resultado-categoria h3 {
@@ -667,8 +654,8 @@
       <label>Posição que se identifica:
         <select id="posicao">
           <option>Top</option>
-          <option>Bottom</option>
           <option>Switch</option>
+          <option>bottom</option>
           <option>Sádico</option>
           <option>Masoquista</option>
           <option>Fetichista</option>
@@ -723,13 +710,13 @@
           <input type="text" id="condicao" placeholder="Descreva qualquer condição médica relevante..." style="display: none;" />
         </div>
       </label>
-      <label>Alguma Condição/Gatilho física ou mental?
+      <label>Alguma condição/limitação/gatilho física ou ?
         <div class="toggle-field">
           <div class="slide-toggle">
             <input type="checkbox" id="limitacaoToggle" />
             <label for="limitacaoToggle" class="slider"></label>
           </div>
-          <input type="text" id="limitacao" placeholder="Descreva qualquer limitação relevante..." style="display: none;" />
+          <input type="text" id="limitacao" placeholder="Descreva qualquer condição relevante..." style="display: none;" />
         </div>
       </label>
     </div>
@@ -776,16 +763,17 @@
 
     <div id="questionario" class="section hidden">
       <h2 id="categoriaAtual"></h2>
-      <div id="perguntaAtual" style="font-size: 1.3rem; font-weight: 600; margin-bottom: 1rem; color: #2c3e50;"></div>
+      <div id="perguntaAtual" style="font-size: 1.3rem; font-weight: 600; margin-bottom: 1rem; color: #2c3e50; text-align: center;"></div>
       
       <div class="question-section">
-        <div class="question-group dar">
-          <h3>🔥 DAR</h3>
-          <div class="question-buttons" id="respostasDar"></div>
+        <div class="question-header">
+          <div class="column-header dar-header">🔥 DAR</div>
+          <div></div>
+          <div class="column-header receber-header">💖 RECEBER</div>
         </div>
-        <div class="question-group receber">
-          <h3>💖 RECEBER</h3>
-          <div class="question-buttons" id="respostasReceber"></div>
+        
+        <div class="question-responses" id="questionResponses">
+          <!-- Respostas serão inseridas aqui dinamicamente -->
         </div>
       </div>
 
@@ -939,41 +927,96 @@
       respostaReceberAtual = respostasUsuario[indice].receber;
     }
 
-    criarBotoesResposta('respostasDar', 'dar');
-    criarBotoesResposta('respostasReceber', 'receber');
+    criarRespostas();
     
     atualizarProgresso();
     verificarBotaoProximo();
   }
 
-  function criarBotoesResposta(containerId, tipo) {
-    const container = document.getElementById(containerId);
+  function criarRespostas() {
+    const container = document.getElementById('questionResponses');
     container.innerHTML = '';
     
-    respostas.forEach(r => {
-      const btn = document.createElement('button');
-      btn.textContent = r;
-      btn.setAttribute('data-resposta', r);
-      btn.onclick = () => {
-        // Remover seleção anterior
-        container.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        
-        if (tipo === 'dar') {
-          respostaDarAtual = r;
+    respostas.forEach(resposta => {
+      const responseRow = document.createElement('div');
+      responseRow.className = 'response-row';
+      
+      // Toggle DAR
+      const darSwitch = document.createElement('div');
+      darSwitch.className = 'response-switch dar-switch';
+      
+      const darInput = document.createElement('input');
+      darInput.type = 'checkbox';
+      darInput.id = `dar-${resposta.replace(/\s+/g, '-').toLowerCase()}-${indice}`;
+      
+      const darSlider = document.createElement('label');
+      darSlider.className = 'response-slider';
+      darSlider.setAttribute('for', darInput.id);
+      
+      darSwitch.appendChild(darInput);
+      darSwitch.appendChild(darSlider);
+      
+      // Texto da resposta (centralizado)
+      const responseText = document.createElement('div');
+      responseText.className = 'response-text';
+      responseText.textContent = resposta;
+      
+      // Toggle RECEBER
+      const receberSwitch = document.createElement('div');
+      receberSwitch.className = 'response-switch receber-switch';
+      
+      const receberInput = document.createElement('input');
+      receberInput.type = 'checkbox';
+      receberInput.id = `receber-${resposta.replace(/\s+/g, '-').toLowerCase()}-${indice}`;
+      
+      const receberSlider = document.createElement('label');
+      receberSlider.className = 'response-slider';
+      receberSlider.setAttribute('for', receberInput.id);
+      
+      receberSwitch.appendChild(receberInput);
+      receberSwitch.appendChild(receberSlider);
+      
+      // Event listeners
+      darInput.addEventListener('change', function() {
+        if (this.checked) {
+          // Desmarcar outros toggles DAR
+          container.querySelectorAll('.dar-switch input[type="checkbox"]').forEach(cb => {
+            if (cb !== this) cb.checked = false;
+          });
+          respostaDarAtual = resposta;
         } else {
-          respostaReceberAtual = r;
+          respostaDarAtual = null;
         }
-        
         verificarBotaoProximo();
-      };
+      });
+      
+      receberInput.addEventListener('change', function() {
+        if (this.checked) {
+          // Desmarcar outros toggles RECEBER
+          container.querySelectorAll('.receber-switch input[type="checkbox"]').forEach(cb => {
+            if (cb !== this) cb.checked = false;
+          });
+          respostaReceberAtual = resposta;
+        } else {
+          respostaReceberAtual = null;
+        }
+        verificarBotaoProximo();
+      });
       
       // Marcar como selecionado se for a resposta atual
-      if ((tipo === 'dar' && respostaDarAtual === r) || (tipo === 'receber' && respostaReceberAtual === r)) {
-        btn.classList.add('selected');
+      if (respostaDarAtual === resposta) {
+        darInput.checked = true;
+      }
+      if (respostaReceberAtual === resposta) {
+        receberInput.checked = true;
       }
       
-      container.appendChild(btn);
+      // Montar a linha
+      responseRow.appendChild(darSwitch);
+      responseRow.appendChild(responseText);
+      responseRow.appendChild(receberSwitch);
+      
+      container.appendChild(responseRow);
     });
   }
 
