@@ -884,6 +884,7 @@
   let respostasUsuario = [];
   let respostaDarAtual = null;
   let respostaReceberAtual = null;
+  let voltouPergunta = false;
 
   function iniciarQuestionario() {
     const selecionadas = Array.from(document.querySelectorAll('[data-subcategoria].active')).map(btn => btn.textContent);
@@ -1020,12 +1021,25 @@
     });
   }
 
-  function verificarBotaoProximo() {
-    // Mudança automática quando ambas as respostas são selecionadas
-    if (respostaDarAtual && respostaReceberAtual) {
+function verificarBotaoProximo() {
+  const btnProximo = document.querySelector('.btn-proximo');
+  
+  if (respostaDarAtual && respostaReceberAtual) {
+    if (voltouPergunta) {
+      // Se voltou, mostra botão próximo
+      if (!btnProximo) {
+        const btnAnterior = document.querySelector('.btn-anterior');
+        const novoBtn = document.createElement('button');
+        novoBtn.className = 'nav-btn btn-proximo';
+        novoBtn.textContent = '➡️ Próximo';
+        novoBtn.onclick = proximaPergunta;
+        btnAnterior.parentNode.appendChild(novoBtn);
+      }
+    } else {
+      // Uso normal = auto-avanço
       setTimeout(() => {
         proximaPergunta();
-      }, 500); // Pequeno delay para mostrar a seleção
+      }, 500);
     }
   }
 
@@ -1033,7 +1047,11 @@
     if (!respostaDarAtual || !respostaReceberAtual) {
       return; // Não fazer nada se não houver respostas completas
     }
-    
+    voltouPergunta = false;
+  const btnProximo = document.querySelector('.btn-proximo');
+  if (btnProximo) {
+    btnProximo.remove();
+  }
     const atual = listaPerguntas[indice];
     respostasUsuario[indice] = {
       categoria: atual.categoria,
@@ -1053,8 +1071,9 @@
 
   function anteriorPergunta() {
     if (indice > 0) {
-      indice--;
-      mostrarPergunta();
+    indice--;
+    voltouPergunta = true;
+    mostrarPergunta();
     }
   }
 
