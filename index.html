@@ -710,42 +710,33 @@
 
    @media (max-width: 768px) {
   .question-header {
-  grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-    padding: 0.8rem;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.3rem;
+    padding: 0.6rem;
   }
   
   .column-header {
-    font-size: 0.9rem;
-    padding: 0.6rem;
-    min-width: 0;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.2rem;
+    word-wrap: break-word;
   }
   
   .response-row {
-    grid-template-columns: 1fr 2.5fr 1fr;
-    gap: 0.4rem;
-    padding: 0.6rem;
+    grid-template-columns: 1fr 1fr 1fr;  /* IGUAL PARA TODOS */
+    gap: 0.3rem;
+    padding: 0.5rem;
   }
   
   .response-text {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    text-align: center;
   }
   
   .response-switch {
-    width: 45px;
-    height: 22px;
+    width: 40px;
+    height: 20px;
   }
 }
-Se quiser ainda mais iguais, use:
-css.question-header {
-  grid-template-columns: 1fr 1fr;  /* Remove a coluna do meio */
-}
-
-.response-row {
-  grid-template-columns: 1fr 2.5fr 1fr;  /* Mais espaço para o texto */
-}
- }
-
    .toggle-group {
         grid-template-columns: 1fr;
       }
