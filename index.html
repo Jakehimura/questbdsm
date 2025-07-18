@@ -174,8 +174,8 @@
 }
 
 .top-bar .btn {
-  align-self: flex-start;  /* ou flex-end para baixo */
-  margin-top: 0;  /* ADICIONE ESTA LINHA */
+  align-self: flex-start;
+  margin-top: 0;
 }
     
    .btn:hover {
@@ -708,14 +708,130 @@
       margin: 2rem 0 1rem 0;
     }
 
+    .estatisticas-gerais {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .dark .estatisticas-gerais {
+      background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .dark .stat-card {
+      background: #2c3e50;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .compartilhar-container {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border-radius: 15px;
+      text-align: center;
+      color: white;
+    }
+
+    .dark .compartilhar-container {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    }
+
+    .btn-compartilhar {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid white;
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 0.5rem;
+    }
+
+    .btn-compartilhar:hover {
+      background: white;
+      color: #667eea;
+      transform: translateY(-2px);
+    }
+
+    .dark .btn-compartilhar:hover {
+      color: #3498db;
+    }
+
+    .link-compartilhado {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      word-break: break-all;
+      font-size: 0.9rem;
+    }
+
+    .alerta-compartilhamento {
+      background: rgba(46, 204, 113, 0.1);
+      border: 2px solid #2ecc71;
+      color: #27ae60;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+
+    .dark .alerta-compartilhamento {
+      color: #2ecc71;
+    }
+
+    .modo-visualizacao {
+      background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+      color: white;
+      padding: 1rem;
+      margin-bottom: 2rem;
+      border-radius: 15px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .dark .modo-visualizacao {
+      background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+    }
+
     @media (max-width: 768px) {
       .question-section {
-	grid-template-columns: 1fr 2fr 1fr;  /* DAR = RECEBER */
+	grid-template-columns: 1fr 2fr 1fr;
         gap: 1rem;
       }
 
       .response-row {
-       grid-template-columns: 1fr 2fr 1fr;  /* DAR = RECEBER */
+       grid-template-columns: 1fr 2fr 1fr;
       }
 
    .toggle-group {
@@ -1223,6 +1339,12 @@ function proximaPergunta() {
       }
     });
 
+    // Adicionar estatísticas gerais
+    adicionarEstatisticasGerais(resumo, respostasFiltradas);
+
+    // Adicionar botão de compartilhamento
+    adicionarBotaoCompartilhar(resumo);
+
     for (const categoria in agrupado) {
       const secao = document.createElement('div');
       secao.className = 'resultado-categoria';
@@ -1276,6 +1398,283 @@ function proximaPergunta() {
     return container;
   }
 
+  // Sistema de compartilhamento
+  function gerarLinkCompartilhamento() {
+    const dadosParaCompartilhar = {
+      respostas: respostasUsuario,
+      perfil: {
+        posicao: document.getElementById('posicao').value,
+        dor: document.getElementById('dor').value,
+        teorica: document.getElementById('teorica').value,
+        pratica: document.getElementById('pratica').value,
+        sexualidade: document.getElementById('sexualidade').value
+      },
+      timestamp: new Date().toISOString()
+    };
+    
+    try {
+      const dadosString = JSON.stringify(dadosParaCompartilhar);
+      const dadosComprimidos = btoa(encodeURIComponent(dadosString));
+      const urlAtual = window.location.href.split('#')[0];
+      return `${urlAtual}#resultado=${dadosComprimidos}`;
+    } catch (error) {
+      console.error('Erro ao gerar link:', error);
+      alert('Erro ao gerar link de compartilhamento');
+      return null;
+    }
+  }
+
+  function copiarLinkCompartilhamento() {
+    const link = gerarLinkCompartilhamento();
+    if (!link) return;
+    
+    navigator.clipboard.writeText(link).then(() => {
+      // Mostrar feedback visual
+      const botao = event.target;
+      const textoOriginal = botao.textContent;
+      botao.textContent = '✅ Link Copiado!';
+      botao.style.background = '#27ae60';
+      
+      setTimeout(() => {
+        botao.textContent = textoOriginal;
+        botao.style.background = '';
+      }, 2000);
+      
+      // Mostrar link gerado
+      mostrarLinkGerado(link);
+    }).catch(() => {
+      // Fallback para navegadores mais antigos
+      const input = document.createElement('input');
+      input.value = link;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      
+      alert('Link copiado para a área de transferência!');
+      mostrarLinkGerado(link);
+    });
+  }
+
+  function mostrarLinkGerado(link) {
+    const container = document.querySelector('.compartilhar-container');
+    let linkDiv = container.querySelector('.link-compartilhado');
+    
+    if (!linkDiv) {
+      linkDiv = document.createElement('div');
+      linkDiv.className = 'link-compartilhado';
+      container.appendChild(linkDiv);
+    }
+    
+    linkDiv.innerHTML = `
+      <strong>🔗 Seu link de compartilhamento:</strong><br>
+      <span style="font-size: 0.8rem;">${link}</span>
+    `;
+    
+    // Adicionar alerta
+    let alerta = container.querySelector('.alerta-compartilhamento');
+    if (!alerta) {
+      alerta = document.createElement('div');
+      alerta.className = 'alerta-compartilhamento';
+      alerta.innerHTML = '✅ Link copiado! Agora você pode compartilhar seus resultados com qualquer pessoa.';
+      container.appendChild(alerta);
+    }
+  }
+
+  function adicionarEstatisticasGerais(container, respostasFiltradas) {
+    const stats = calcularEstatisticas(respostasFiltradas);
+    
+    const estatisticas = document.createElement('div');
+    estatisticas.className = 'estatisticas-gerais';
+    
+    estatisticas.innerHTML = `
+      <h3>📊 Resumo dos Seus Resultados</h3>
+        <div class="stat-card">
+          <div class="stat-number" style="color: #27ae60;">${stats.totalAdoro}</div>
+          <div class="stat-label">Práticas que você ADORA</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color: #f39c12;">${stats.totalAceito}</div>
+          <div class="stat-label">Práticas que você ACEITA</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color: #e74c3c;">${stats.totalLimites}</div>
+          <div class="stat-label">Limites Rígidos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color: #95a5a6;">${stats.totalNunca}</div>
+          <div class="stat-label">Nunca Experimentou</div>
+        </div>
+      </div>
+    `;
+    
+    container.appendChild(estatisticas);
+  }
+
+  function adicionarBotaoCompartilhar(container) {
+    const compartilhar = document.createElement('div');
+    compartilhar.className = 'compartilhar-container';
+    
+    compartilhar.innerHTML = `
+      <h3>🔗 Compartilhar Resultados</h3>
+      <p>Gere um link único para compartilhar seus resultados com outras pessoas</p>
+      <button class="btn-compartilhar" onclick="copiarLinkCompartilhamento()">
+        📋 Copiar Link de Compartilhamento
+      </button>
+    `;
+    
+    container.appendChild(compartilhar);
+  }
+
+  function calcularEstatisticas(respostas) {
+    const stats = {
+      totalAdoro: 0,
+      totalAceito: 0,
+      totalLimites: 0,
+      totalNunca: 0
+    };
+    
+    respostas.forEach(r => {
+      [r.dar, r.receber].forEach(resposta => {
+        if (resposta === 'Adoro' || resposta === 'Aproveito') stats.totalAdoro++;
+        else if (resposta === 'Aceito' || resposta === 'Tolero') stats.totalAceito++;
+        else if (resposta === 'Limite rígido') stats.totalLimites++;
+        else if (resposta === 'Nunca experimentei') stats.totalNunca++;
+      });
+    });
+    
+    return stats;
+  }
+
+  // Detectar e carregar resultados compartilhados
+  function verificarResultadoCompartilhado() {
+    const hash = window.location.hash;
+    if (hash.startsWith('#resultado=')) {
+      try {
+        const dadosComprimidos = hash.substring(11); // Remove '#resultado='
+        const dadosString = decodeURIComponent(atob(dadosComprimidos));
+        const dados = JSON.parse(dadosString);
+        
+        // Carregar dados compartilhados
+        respostasUsuario = dados.respostas || [];
+        
+        // Mostrar aviso de visualização
+        mostrarModoVisualizacao(dados);
+        
+        // Mostrar resultados
+        document.getElementById('questionario').classList.add('hidden');
+        document.getElementById('resultados').classList.remove('hidden');
+        mostrarResultadoCompartilhado(dados);
+        
+        return true;
+      } catch (error) {
+        console.error('Erro ao carregar resultado compartilhado:', error);
+        alert('Link de compartilhamento inválido ou corrompido');
+        // Limpar hash inválido
+        window.location.hash = '';
+        return false;
+      }
+    }
+    return false;
+  }
+
+  function mostrarModoVisualizacao(dados) {
+    const container = document.querySelector('.container');
+    const aviso = document.createElement('div');
+    aviso.className = 'modo-visualizacao';
+    
+    const dataFormatada = new Date(dados.timestamp).toLocaleDateString('pt-BR');
+    
+    aviso.innerHTML = `
+      👁️ <strong>Modo Visualização</strong> - Você está visualizando resultados compartilhados
+      <br>
+      <small>Perfil: ${dados.perfil?.posicao || 'N/A'} | Data: ${dataFormatada}</small>
+      <br>
+      <button onclick="window.location.hash=''; location.reload();" style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: white; color: #e67e22; border: none; border-radius: 5px; cursor: pointer;">
+        🏠 Fazer Meu Próprio Teste
+      </button>
+    `;
+    
+    container.insertBefore(aviso, container.firstChild);
+  }
+
+  function mostrarResultadoCompartilhado(dados) {
+    const resumo = document.getElementById('resumo');
+    resumo.innerHTML = '';
+    
+    // Não adicionar botão de compartilhamento em modo visualização
+    const agrupado = {};
+    const respostasFiltradas = dados.respostas.filter(r => 
+      r.dar !== 'N/A' || r.receber !== 'N/A'
+    );
+
+    respostasFiltradas.forEach(r => {
+      if (!agrupado[r.categoria]) {
+        agrupado[r.categoria] = { dar: {}, receber: {} };
+      }
+      
+      if (r.dar !== 'N/A') {
+        if (!agrupado[r.categoria].dar[r.dar]) {
+          agrupado[r.categoria].dar[r.dar] = [];
+        }
+        agrupado[r.categoria].dar[r.dar].push(r.pergunta);
+      }
+      
+      if (r.receber !== 'N/A') {
+        if (!agrupado[r.categoria].receber[r.receber]) {
+          agrupado[r.categoria].receber[r.receber] = [];
+        }
+        agrupado[r.categoria].receber[r.receber].push(r.pergunta);
+      }
+    });
+
+    // Adicionar estatísticas
+    adicionarEstatisticasGerais(resumo, respostasFiltradas);
+
+    // Mostrar perfil compartilhado
+    if (dados.perfil) {
+      const perfilDiv = document.createElement('div');
+      perfilDiv.className = 'estatisticas-gerais';
+      perfilDiv.innerHTML = `
+        <h3>👤 Perfil</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Posição</div>
+            <div style="font-weight: 600;">${dados.perfil.posicao}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Tolerância à Dor</div>
+            <div style="font-weight: 600;">${dados.perfil.dor}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Experiência Teórica</div>
+            <div style="font-weight: 600;">${dados.perfil.teorica}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Experiência Prática</div>
+            <div style="font-weight: 600;">${dados.perfil.pratica}</div>
+          </div>
+        </div>
+      `;
+      resumo.appendChild(perfilDiv);
+    }
+
+    // Adicionar resultados por categoria
+    for (const categoria in agrupado) {
+      const secao = document.createElement('div');
+      secao.className = 'resultado-categoria';
+      secao.innerHTML = `<h3>📋 ${categoria}</h3>`;
+      
+      const tabelaDar = criarTabelaResultado(agrupado[categoria].dar, 'DAR');
+      secao.appendChild(tabelaDar);
+      
+      const tabelaReceber = criarTabelaResultado(agrupado[categoria].receber, 'RECEBER');
+      secao.appendChild(tabelaReceber);
+      
+      resumo.appendChild(secao);
+    }
+  }
+
   // Adicionar estilo para o tema escuro no perguntaAtual
   const observer = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
@@ -1318,6 +1717,11 @@ function proximaPergunta() {
       campo.style.display = 'none';
       campo.value = '';
     }
+  });
+
+  // Verificar resultado compartilhado ao carregar a página
+  window.addEventListener('load', function() {
+    verificarResultadoCompartilhado();
   });
 </script>
 </body>
