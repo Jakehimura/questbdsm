@@ -1398,7 +1398,86 @@ function proximaPergunta() {
     return container;
   }
 
-  // Sistema de compartilhamento
+  // Sistema de compartilhamento com compressão avançada
+  function comprimirDados(dados) {
+    // Criar mapeamento para reduzir tamanho
+    const respostasMap = {
+      'N/A': '0',
+      'Nunca experimentei': '1', 
+      'Adoro': '2',
+      'Aproveito': '3',
+      'Aceito': '4',
+      'Tolero': '5',
+      'Limite rígido': '6'
+    };
+    
+    const categoriasMap = {
+      'Atos sexuais': 'A',
+      'Bondage': 'B', 
+      'Sadismo e Masoquismo': 'S',
+      'Dominação e Submissão': 'D',
+      'Role Play': 'R',
+      'Fetiches': 'F',
+      'Equipamentos': 'E'
+    };
+    
+    // Comprimir respostas
+    const respostasComprimidas = dados.respostas.map(r => {
+      const catIndex = Object.keys(categoriasMap).indexOf(r.categoria);
+      const perguntaIndex = perguntas[r.categoria].indexOf(r.pergunta);
+      return `${catIndex}:${perguntaIndex}:${respostasMap[r.dar]}:${respostasMap[r.receber]}`;
+    }).join('|');
+    
+    // Comprimir perfil
+    const perfilComprimido = [
+      Object.keys(document.getElementById('posicao').options).indexOf(dados.perfil.posicao) || 0,
+      Object.keys(document.getElementById('dor').options).indexOf(dados.perfil.dor) || 0,
+      Object.keys(document.getElementById('teorica').options).indexOf(dados.perfil.teorica) || 0,
+      Object.keys(document.getElementById('pratica').options).indexOf(dados.perfil.pratica) || 0,
+      Object.keys(document.getElementById('sexualidade').options).indexOf(dados.perfil.sexualidade) || 0
+    ].join(',');
+    
+    return `${respostasComprimidas}#${perfilComprimido}`;
+  }
+  
+  function descomprimirDados(dadosComprimidos) {
+    const [respostasStr, perfilStr] = dadosComprimidos.split('#');
+    
+    const respostasMap = ['N/A', 'Nunca experimentei', 'Adoro', 'Aproveito', 'Aceito', 'Tolero', 'Limite rígido'];
+    const categorias = ['Atos sexuais', 'Bondage', 'Sadismo e Masoquismo', 'Dominação e Submissão', 'Role Play', 'Fetiches', 'Equipamentos'];
+    
+    // Descomprimir respostas
+    const respostas = respostasStr.split('|').map(item => {
+      const [catIndex, pergIndex, darIndex, receberIndex] = item.split(':');
+      const categoria = categorias[parseInt(catIndex)];
+      return {
+        categoria: categoria,
+        pergunta: perguntas[categoria][parseInt(pergIndex)],
+        dar: respostasMap[parseInt(darIndex)],
+        receber: respostasMap[parseInt(receberIndex)]
+      };
+    });
+    
+    // Descomprimir perfil
+    const perfilIndices = perfilStr.split(',').map(x => parseInt(x));
+    const posicoes = ['Top', 'Switch', 'bottom', 'Sádico', 'Masoquista', 'Fetichista', 'Outros'];
+    const dores = ['Muito Baixa', 'Baixa', 'Média', 'Alta', 'Muito Alta', 'N/A'];
+    const experiencias = ['0-3 anos', '3-5 anos', '5-7 anos', '7-10 anos', '10+ anos'];
+    const sexualidades = ['Heterossexual', 'Homossexual', 'Bissexual', 'Pansexual', 'Assexual', 'Demissexual', 'Outros'];
+    
+    return {
+      respostas: respostas,
+      perfil: {
+        posicao: posicoes[perfilIndices[0]] || 'Top',
+        dor: dores[perfilIndices[1]] || 'Média', 
+        teorica: experiencias[perfilIndices[2]] || '0-3 anos',
+        pratica: experiencias[perfilIndices[3]] || '0-3 anos',
+        sexualidade: sexualidades[perfilIndices[4]] || 'Heterossexual'
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
+
   function gerarLinkCompartilhamento() {
     const dadosParaCompartilhar = {
       respostas: respostasUsuario,
@@ -1413,10 +1492,10 @@ function proximaPergunta() {
     };
     
     try {
-      const dadosString = JSON.stringify(dadosParaCompartilhar);
-      const dadosComprimidos = btoa(encodeURIComponent(dadosString));
+      const dadosComprimidos = comprimirDados(dadosParaCompartilhar);
+      const dadosBase64 = btoa(dadosComprimidos);
       const urlAtual = window.location.href.split('#')[0];
-      return `${urlAtual}#resultado=${dadosComprimidos}`;
+      return `${urlAtual}#r=${dadosBase64}`;
     } catch (error) {
       console.error('Erro ao gerar link:', error);
       alert('Erro ao gerar link de compartilhamento');
@@ -1549,33 +1628,48 @@ function proximaPergunta() {
   // Detectar e carregar resultados compartilhados
   function verificarResultadoCompartilhado() {
     const hash = window.location.hash;
+    
+    // Suportar formato antigo e novo
     if (hash.startsWith('#resultado=')) {
+      // Formato antigo (compatibilidade)
       try {
-        const dadosComprimidos = hash.substring(11); // Remove '#resultado='
+        const dadosComprimidos = hash.substring(11);
         const dadosString = decodeURIComponent(atob(dadosComprimidos));
         const dados = JSON.parse(dadosString);
-        
-        // Carregar dados compartilhados
-        respostasUsuario = dados.respostas || [];
-        
-        // Mostrar aviso de visualização
-        mostrarModoVisualizacao(dados);
-        
-        // Mostrar resultados
-        document.getElementById('questionario').classList.add('hidden');
-        document.getElementById('resultados').classList.remove('hidden');
-        mostrarResultadoCompartilhado(dados);
-        
+        processarResultadoCompartilhado(dados);
         return true;
       } catch (error) {
-        console.error('Erro ao carregar resultado compartilhado:', error);
-        alert('Link de compartilhamento inválido ou corrompido');
-        // Limpar hash inválido
-        window.location.hash = '';
-        return false;
+        console.error('Erro no formato antigo:', error);
       }
     }
+    
+    if (hash.startsWith('#r=')) {
+      // Formato novo (comprimido)
+      try {
+        const dadosBase64 = hash.substring(3);
+        const dadosComprimidos = atob(dadosBase64);
+        const dados = descomprimirDados(dadosComprimidos);
+        processarResultadoCompartilhado(dados);
+        return true;
+      } catch (error) {
+        console.error('Erro no formato novo:', error);
+      }
+    }
+    
     return false;
+  }
+  
+  function processarResultadoCompartilhado(dados) {
+    // Carregar dados compartilhados
+    respostasUsuario = dados.respostas || [];
+    
+    // Mostrar aviso de visualização
+    mostrarModoVisualizacao(dados);
+    
+    // Mostrar resultados
+    document.getElementById('questionario').classList.add('hidden');
+    document.getElementById('resultados').classList.remove('hidden');
+    mostrarResultadoCompartilhado(dados);
   }
 
   function mostrarModoVisualizacao(dados) {
