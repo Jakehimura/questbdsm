@@ -1398,28 +1398,48 @@ function proximaPergunta() {
     return container;
   }
 
-  // Sistema de compartilhamento com compressão ultra avançada
+  // Sistema de compartilhamento com compressão extrema usando Base64 customizado
+  const base64Custom = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  
+  function toBase64Custom(num) {
+    if (num === 0) return base64Custom[0];
+    let result = '';
+    while (num > 0) {
+      result = base64Custom[num % 64] + result;
+      num = Math.floor(num / 64);
+    }
+    return result;
+  }
+  
+  function fromBase64Custom(str) {
+    let result = 0;
+    for (let i = 0; i < str.length; i++) {
+      result = result * 64 + base64Custom.indexOf(str[i]);
+    }
+    return result;
+  }
+
   function comprimirDados(dados) {
-    // Converter para formato binário compacto
-    let resultado = '';
+    // Usar array de bits para máxima compressão
+    let bits = [];
     
-    // Comprimir respostas (cada resposta = 4 bits)
+    // Comprimir cada resposta em exatamente 15 bits
     dados.respostas.forEach(r => {
       const catIndex = Object.keys(perguntas).indexOf(r.categoria);
       const perguntaIndex = perguntas[r.categoria].indexOf(r.pergunta);
       const darIndex = ['N/A', 'Nunca experimentei', 'Adoro', 'Aproveito', 'Aceito', 'Tolero', 'Limite rígido'].indexOf(r.dar);
       const receberIndex = ['N/A', 'Nunca experimentei', 'Adoro', 'Aproveito', 'Aceito', 'Tolero', 'Limite rígido'].indexOf(r.receber);
       
-      // Formato compacto: categoria(3bits) + pergunta(6bits) + dar(3bits) + receber(3bits) = 15bits
+      // 3 bits categoria + 6 bits pergunta + 3 bits dar + 3 bits receber = 15 bits
       const valor = (catIndex << 12) | (perguntaIndex << 6) | (darIndex << 3) | receberIndex;
-      resultado += valor.toString(36); // Base 36 (0-9, a-z)
-      resultado += ',';
+      
+      // Converter para array de bits (15 bits)
+      for (let i = 14; i >= 0; i--) {
+        bits.push((valor >> i) & 1);
+      }
     });
     
-    // Remover última vírgula
-    resultado = resultado.slice(0, -1);
-    
-    // Adicionar perfil comprimido (5 valores, 3 bits cada = 15 bits total)
+    // Adicionar perfil (15 bits total)
     const posicaoIndex = ['Top', 'Switch', 'bottom', 'Sádico', 'Masoquista', 'Fetichista', 'Outros'].indexOf(dados.perfil.posicao);
     const dorIndex = ['Muito Baixa', 'Baixa', 'Média', 'Alta', 'Muito Alta', 'N/A'].indexOf(dados.perfil.dor);
     const teoricaIndex = ['0-3 anos', '3-5 anos', '5-7 anos', '7-10 anos', '10+ anos'].indexOf(dados.perfil.teorica);
@@ -1427,36 +1447,75 @@ function proximaPergunta() {
     const sexualidadeIndex = ['Heterossexual', 'Homossexual', 'Bissexual', 'Pansexual', 'Assexual', 'Demissexual', 'Outros'].indexOf(dados.perfil.sexualidade);
     
     const perfilValor = (posicaoIndex << 12) | (dorIndex << 9) | (teoricaIndex << 6) | (praticaIndex << 3) | sexualidadeIndex;
-    resultado += '|' + perfilValor.toString(36);
+    
+    // Adicionar 15 bits do perfil
+    for (let i = 14; i >= 0; i--) {
+      bits.push((perfilValor >> i) & 1);
+    }
+    
+    // Converter bits para números de 6 bits (base64)
+    let resultado = '';
+    for (let i = 0; i < bits.length; i += 6) {
+      let sextet = 0;
+      for (let j = 0; j < 6 && i + j < bits.length; j++) {
+        sextet |= (bits[i + j] << (5 - j));
+      }
+      resultado += base64Custom[sextet];
+    }
     
     return resultado;
   }
   
   function descomprimirDados(dadosComprimidos) {
-    const [respostasStr, perfilStr] = dadosComprimidos.split('|');
+    // Converter de base64 customizado para bits
+    let bits = [];
+    for (let char of dadosComprimidos) {
+      const valor = base64Custom.indexOf(char);
+      for (let i = 5; i >= 0; i--) {
+        bits.push((valor >> i) & 1);
+      }
+    }
     
     const respostasMap = ['N/A', 'Nunca experimentei', 'Adoro', 'Aproveito', 'Aceito', 'Tolero', 'Limite rígido'];
     const categorias = Object.keys(perguntas);
     
+    // Calcular quantas respostas temos (cada resposta = 15 bits, perfil = 15 bits)
+    const totalBitsRespostas = bits.length - 15;
+    const numRespostas = Math.floor(totalBitsRespostas / 15);
+    
     // Descomprimir respostas
-    const respostas = respostasStr.split(',').map(item => {
-      const valor = parseInt(item, 36);
+    const respostas = [];
+    for (let i = 0; i < numRespostas; i++) {
+      let valor = 0;
+      for (let j = 0; j < 15; j++) {
+        valor |= (bits[i * 15 + j] << (14 - j));
+      }
+      
       const catIndex = (valor >> 12) & 7; // 3 bits
       const pergIndex = (valor >> 6) & 63; // 6 bits
       const darIndex = (valor >> 3) & 7; // 3 bits
       const receberIndex = valor & 7; // 3 bits
       
       const categoria = categorias[catIndex];
-      return {
-        categoria: categoria,
-        pergunta: perguntas[categoria][pergIndex],
-        dar: respostasMap[darIndex],
-        receber: respostasMap[receberIndex]
-      };
-    });
+      if (categoria && perguntas[categoria] && perguntas[categoria][pergIndex]) {
+        respostas.push({
+          categoria: categoria,
+          pergunta: perguntas[categoria][pergIndex],
+          dar: respostasMap[darIndex],
+          receber: respostasMap[receberIndex]
+        });
+      }
+    }
     
-    // Descomprimir perfil
-    const perfilValor = parseInt(perfilStr, 36);
+    // Descomprimir perfil (últimos 15 bits)
+    let perfilValor = 0;
+    const startPerfil = numRespostas * 15;
+    for (let i = 0; i < 15; i++) {
+      if (startPerfil + i < bits.length) {
+        perfilValor |= (bits[startPerfil + i] << (14 - i));
+      }
+    }
+    
     const posicaoIndex = (perfilValor >> 12) & 7;
     const dorIndex = (perfilValor >> 9) & 7;
     const teoricaIndex = (perfilValor >> 6) & 7;
@@ -1496,10 +1555,8 @@ function proximaPergunta() {
     
     try {
       const dadosComprimidos = comprimirDados(dadosParaCompartilhar);
-      // Usar compressão adicional com deflate simulado
-      const dadosUltraComprimidos = dadosComprimidos.replace(/,/g, '').replace(/\|/g, 'X');
       const urlAtual = window.location.href.split('#')[0];
-      return `${urlAtual}#${btoa(dadosUltraComprimidos).replace(/=+$/, '')}`;
+      return `${urlAtual}#${dadosComprimidos}`;
     } catch (error) {
       console.error('Erro ao gerar link:', error);
       alert('Erro ao gerar link de compartilhamento');
@@ -1635,7 +1692,7 @@ function proximaPergunta() {
     
     // Suportar múltiplos formatos
     if (hash.startsWith('#resultado=')) {
-      // Formato original (compatibilidade)
+      // Formato original (compatibilidade total)
       try {
         const dadosComprimidos = hash.substring(11);
         const dadosString = decodeURIComponent(atob(dadosComprimidos));
@@ -1660,20 +1717,31 @@ function proximaPergunta() {
       }
     }
     
-    if (hash.startsWith('#') && hash.length > 10) {
-      // Formato ultra comprimido (novo)
+    if (hash.length > 5 && !hash.includes('=') && !hash.includes(':')) {
+      // Formato EXTREMO - Base64 customizado (novo)
       try {
-        let dadosBase64 = hash.substring(1);
-        // Adicionar padding se necessário
-        while (dadosBase64.length % 4) {
-          dadosBase64 += '=';
-        }
-        const dadosComprimidos = atob(dadosBase64).replace(/X/g, '|');
+        const dadosComprimidos = hash.substring(1);
         const dados = descomprimirDados(dadosComprimidos);
         processarResultadoCompartilhado(dados);
         return true;
       } catch (error) {
-        console.error('Erro no formato ultra comprimido:', error);
+        console.error('Erro no formato extremo:', error);
+      }
+    }
+    
+    if (hash.startsWith('#') && hash.length > 10) {
+      // Formato ultra comprimido (anterior)
+      try {
+        let dadosBase64 = hash.substring(1);
+        while (dadosBase64.length % 4) {
+          dadosBase64 += '=';
+        }
+        const dadosComprimidos = atob(dadosBase64).replace(/X/g, '|');
+        const dados = descomprimirDadosUltraAntigo(dadosComprimidos);
+        processarResultadoCompartilhado(dados);
+        return true;
+      } catch (error) {
+        console.error('Erro no formato ultra anterior:', error);
       }
     }
     
@@ -1712,6 +1780,54 @@ function proximaPergunta() {
         teorica: experiencias[perfilIndices[2]] || '0-3 anos',
         pratica: experiencias[perfilIndices[3]] || '0-3 anos',
         sexualidade: sexualidades[perfilIndices[4]] || 'Heterossexual'
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
+  
+  // Compatibilidade com formato ultra anterior
+  function descomprimirDadosUltraAntigo(dadosComprimidos) {
+    const [respostasStr, perfilStr] = dadosComprimidos.split('|');
+    
+    const respostasMap = ['N/A', 'Nunca experimentei', 'Adoro', 'Aproveito', 'Aceito', 'Tolero', 'Limite rígido'];
+    const categorias = Object.keys(perguntas);
+    
+    const respostas = respostasStr.split(',').map(item => {
+      const valor = parseInt(item, 36);
+      const catIndex = (valor >> 12) & 7;
+      const pergIndex = (valor >> 6) & 63;
+      const darIndex = (valor >> 3) & 7;
+      const receberIndex = valor & 7;
+      
+      const categoria = categorias[catIndex];
+      return {
+        categoria: categoria,
+        pergunta: perguntas[categoria][pergIndex],
+        dar: respostasMap[darIndex],
+        receber: respostasMap[receberIndex]
+      };
+    });
+    
+    const perfilValor = parseInt(perfilStr, 36);
+    const posicaoIndex = (perfilValor >> 12) & 7;
+    const dorIndex = (perfilValor >> 9) & 7;
+    const teoricaIndex = (perfilValor >> 6) & 7;
+    const praticaIndex = (perfilValor >> 3) & 7;
+    const sexualidadeIndex = perfilValor & 7;
+    
+    const posicoes = ['Top', 'Switch', 'bottom', 'Sádico', 'Masoquista', 'Fetichista', 'Outros'];
+    const dores = ['Muito Baixa', 'Baixa', 'Média', 'Alta', 'Muito Alta', 'N/A'];
+    const experiencias = ['0-3 anos', '3-5 anos', '5-7 anos', '7-10 anos', '10+ anos'];
+    const sexualidades = ['Heterossexual', 'Homossexual', 'Bissexual', 'Pansexual', 'Assexual', 'Demissexual', 'Outros'];
+    
+    return {
+      respostas: respostas,
+      perfil: {
+        posicao: posicoes[posicaoIndex] || 'Top',
+        dor: dores[dorIndex] || 'Média', 
+        teorica: experiencias[teoricaIndex] || '0-3 anos',
+        pratica: experiencias[praticaIndex] || '0-3 anos',
+        sexualidade: sexualidades[sexualidadeIndex] || 'Heterossexual'
       },
       timestamp: new Date().toISOString()
     };
