@@ -1399,10 +1399,12 @@ function proximaPergunta() {
   }
 
   // Sistema de compartilhamento com JSONBin.io
-  const JSONBIN_API_KEY = '$2a$10$iHiTKhgOQKuBcmDVf/aqtOk5HDWGwvLLtsOQT4FG.LZ8f0V4hrJNu'; 
+  const JSONBIN_API_KEY = '$2a$10$iHiTKhgOQKuBcmDVf/aqtOk5HDWGwvLLtsOQT4FG.LZ8f0V4hrJNu'; // Você vai substituir isso
 
   async function salvarResultadoNoJSONBin(dados) {
     try {
+      console.log('Tentando salvar dados:', dados);
+      
       const response = await fetch('https://api.jsonbin.io/v3/b', {
         method: 'POST',
         headers: {
@@ -1414,13 +1416,18 @@ function proximaPergunta() {
         body: JSON.stringify(dados)
       });
 
+      console.log('Response status:', response.status);
+
       if (!response.ok) {
         throw new Error(`JSONBin API error: ${response.status}`);
       }
 
       const result = await response.json();
+      console.log('Resultado da API:', result);
+      
       // O ID do bin é o que vem depois do último /
       const binId = result.metadata.id;
+      console.log('Bin ID gerado:', binId);
       
       return binId;
       
@@ -1432,20 +1439,26 @@ function proximaPergunta() {
 
   async function buscarResultadoDoJSONBin(binId) {
     try {
+      console.log('Tentando buscar bin ID:', binId);
+      
       const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
         headers: {
           'X-Master-Key': JSONBIN_API_KEY
         }
       });
 
+      console.log('Response status busca:', response.status);
+
       if (!response.ok) {
         if (response.status === 404) {
+          console.log('Bin não encontrado (404)');
           return null; // Bin não encontrado
         }
         throw new Error(`JSONBin API error: ${response.status}`);
       }
 
       const result = await response.json();
+      console.log('Dados encontrados:', result);
       return result.record; // Os dados estão em .record
       
     } catch (error) {
