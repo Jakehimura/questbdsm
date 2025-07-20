@@ -1420,111 +1420,151 @@ function proximaPergunta() {
   }
 
   function comprimirDados(dados) {
-    // Usar BigInt para números muito grandes e compressão extrema
-    let valorGigante = BigInt(0);
-    let totalBits = 0;
-    
-    // Comprimir cada resposta em 12 bits (ao invés de 15)
-    dados.respostas.forEach(r => {
-      const catIndex = Object.keys(perguntas).indexOf(r.categoria);
-      const perguntaIndex = perguntas[r.categoria].indexOf(r.pergunta);
-      const darIndex = ['N/A', 'Nunca experimentei', 'Adoro', 'Aproveito', 'Aceito', 'Tolero', 'Limite rígido'].indexOf(r.dar);
-      const receberIndex = ['N/A', 'Nunca experimentei', 'Adoro', 'Aproveito', 'Aceito', 'Tolero', 'Limite rígido'].indexOf(r.receber);
+    try {
+      console.log('Iniciando compressão de:', dados);
       
-      // 3 bits categoria + 6 bits pergunta + 3 bits dar/receber combinados = 12 bits
-      // Combinar dar+receber em um só valor (7*7=49 combinações, cabe em 6 bits)
-      const darReceberCombinado = darIndex * 7 + receberIndex;
-      const valor = (catIndex << 9) | (perguntaIndex << 3) | (darReceberCombinado & 7);
+      // Usar BigInt para números muito grandes e compressão extrema
+      let valorGigante = BigInt(0);
       
-      valorGigante = valorGigante * BigInt(4096) + BigInt(valor); // 2^12 = 4096
-      totalBits += 12;
-    });
-    
-    // Adicionar perfil (12 bits total - mais comprimido)
-    const posicaoIndex = ['Top', 'Switch', 'bottom', 'Sádico', 'Masoquista', 'Fetichista', 'Outros'].indexOf(dados.perfil.posicao);
-    const dorIndex = ['Muito Baixa', 'Baixa', 'Média', 'Alta', 'Muito Alta', 'N/A'].indexOf(dados.perfil.dor);
-    const teoricaIndex = ['0-3 anos', '3-5 anos', '5-7 anos', '7-10 anos', '10+ anos'].indexOf(dados.perfil.teorica);
-    const praticaIndex = ['0-3 anos', '3-5 anos', '5-7 anos', '7-10 anos', '10+ anos'].indexOf(dados.perfil.pratica);
-    const sexualidadeIndex = ['Heterossexual', 'Homossexual', 'Bissexual', 'Pansexual', 'Assexual', 'Demissexual', 'Outros'].indexOf(dados.perfil.sexualidade);
-    
-    // Comprimir perfil: 3+3+3+3 = 12 bits
-    const perfilValor = (posicaoIndex << 9) | (dorIndex << 6) | (teoricaIndex << 3) | praticaIndex;
-    valorGigante = valorGigante * BigInt(4096) + BigInt(perfilValor);
-    
-    // Converter BigInt para string base64 customizada
-    let resultado = '';
-    let temp = valorGigante;
-    
-    if (temp === BigInt(0)) return base64Custom[0];
-    
-    while (temp > BigInt(0)) {
-      resultado = base64Custom[Number(temp % BigInt(64))] + resultado;
-      temp = temp / BigInt(64);
+      // Comprimir cada resposta em 12 bits
+      dados.respostas.forEach((r, index) => {
+        console.log(`Comprimindo resposta ${index}:`, r);
+        
+        const catIndex = Object.keys(perguntas).indexOf(r.categoria);
+        const perguntaIndex = perguntas[r.categoria].indexOf(r.pergunta);
+        const darIndex = ['N/A', 'Nunca experimentei', 'Adoro', 'Aproveito', 'Aceito', 'Tolero', 'Limite rígido'].indexOf(r.dar);
+        const receberIndex = ['N/A', 'Nunca experimentei', 'Adoro', 'Aproveito', 'Aceito', 'Tolero', 'Limite rígido'].indexOf(r.receber);
+        
+        console.log('Índices:', { catIndex, perguntaIndex, darIndex, receberIndex });
+        
+        // CORREÇÃO: Combinar dar+receber corretamente (49 combinações = 6 bits, não 3)
+        const darReceberCombinado = darIndex * 7 + receberIndex;
+        const valor = (catIndex << 9) | (perguntaIndex << 3) | (darReceberCombinado & 7);
+        
+        console.log('Valor comprimido:', valor);
+        
+        valorGigante = valorGigante * BigInt(4096) + BigInt(valor);
+      });
+      
+      // Adicionar perfil (12 bits total)
+      const posicaoIndex = ['Top', 'Switch', 'bottom', 'Sádico', 'Masoquista', 'Fetichista', 'Outros'].indexOf(dados.perfil.posicao);
+      const dorIndex = ['Muito Baixa', 'Baixa', 'Média', 'Alta', 'Muito Alta', 'N/A'].indexOf(dados.perfil.dor);
+      const teoricaIndex = ['0-3 anos', '3-5 anos', '5-7 anos', '7-10 anos', '10+ anos'].indexOf(dados.perfil.teorica);
+      const praticaIndex = ['0-3 anos', '3-5 anos', '5-7 anos', '7-10 anos', '10+ anos'].indexOf(dados.perfil.pratica);
+      
+      console.log('Perfil índices:', { posicaoIndex, dorIndex, teoricaIndex, praticaIndex });
+      
+      // Comprimir perfil: 3+3+3+3 = 12 bits
+      const perfilValor = (posicaoIndex << 9) | (dorIndex << 6) | (teoricaIndex << 3) | praticaIndex;
+      valorGigante = valorGigante * BigInt(4096) + BigInt(perfilValor);
+      
+      console.log('Valor gigante final:', valorGigante.toString());
+      
+      // Converter BigInt para string base64 customizada
+      let resultado = '';
+      let temp = valorGigante;
+      
+      if (temp === BigInt(0)) return base64Custom[0];
+      
+      while (temp > BigInt(0)) {
+        resultado = base64Custom[Number(temp % BigInt(64))] + resultado;
+        temp = temp / BigInt(64);
+      }
+      
+      console.log('Resultado comprimido:', resultado);
+      return resultado;
+      
+    } catch (error) {
+      console.error('Erro na compressão:', error);
+      return null;
     }
-    
-    return resultado;
   }
   
   function descomprimirDados(dadosComprimidos) {
-    // Converter de base64 customizado para BigInt
-    let valorGigante = BigInt(0);
-    for (let char of dadosComprimidos) {
-      valorGigante = valorGigante * BigInt(64) + BigInt(base64Custom.indexOf(char));
-    }
-    
-    const respostasMap = ['N/A', 'Nunca experimentei', 'Adoro', 'Aproveito', 'Aceito', 'Tolero', 'Limite rígido'];
-    const categorias = Object.keys(perguntas);
-    
-    // Primeiro extrair perfil (últimos 12 bits)
-    const perfilValor = Number(valorGigante % BigInt(4096));
-    valorGigante = valorGigante / BigInt(4096);
-    
-    const posicaoIndex = (perfilValor >> 9) & 7;
-    const dorIndex = (perfilValor >> 6) & 7;
-    const teoricaIndex = (perfilValor >> 3) & 7;
-    const praticaIndex = perfilValor & 7;
-    
-    // Descomprimir respostas
-    const respostas = [];
-    while (valorGigante > BigInt(0)) {
-      const valor = Number(valorGigante % BigInt(4096));
+    try {
+      console.log('Iniciando descompressão de:', dadosComprimidos);
+      
+      // Converter de base64 customizado para BigInt
+      let valorGigante = BigInt(0);
+      for (let char of dadosComprimidos) {
+        const index = base64Custom.indexOf(char);
+        if (index === -1) {
+          throw new Error(`Caractere inválido: ${char}`);
+        }
+        valorGigante = valorGigante * BigInt(64) + BigInt(index);
+      }
+      
+      console.log('Valor gigante:', valorGigante.toString());
+      
+      const respostasMap = ['N/A', 'Nunca experimentei', 'Adoro', 'Aproveito', 'Aceito', 'Tolero', 'Limite rígido'];
+      const categorias = Object.keys(perguntas);
+      
+      // Primeiro extrair perfil (últimos 12 bits)
+      const perfilValor = Number(valorGigante % BigInt(4096));
       valorGigante = valorGigante / BigInt(4096);
       
-      const catIndex = (valor >> 9) & 7; // 3 bits
-      const pergIndex = (valor >> 3) & 63; // 6 bits
-      const darReceberCombinado = valor & 7; // 3 bits
+      console.log('Perfil valor:', perfilValor);
       
-      // Decodificar dar+receber combinados
-      const darIndex = Math.floor(darReceberCombinado / 7);
-      const receberIndex = darReceberCombinado % 7;
+      const posicaoIndex = (perfilValor >> 9) & 7;
+      const dorIndex = (perfilValor >> 6) & 7;
+      const teoricaIndex = (perfilValor >> 3) & 7;
+      const praticaIndex = perfilValor & 7;
       
-      const categoria = categorias[catIndex];
-      if (categoria && perguntas[categoria] && perguntas[categoria][pergIndex]) {
-        respostas.unshift({ // unshift porque estamos extraindo de trás para frente
-          categoria: categoria,
-          pergunta: perguntas[categoria][pergIndex],
-          dar: respostasMap[darIndex] || 'N/A',
-          receber: respostasMap[receberIndex] || 'N/A'
-        });
+      console.log('Índices do perfil:', { posicaoIndex, dorIndex, teoricaIndex, praticaIndex });
+      
+      // Descomprimir respostas
+      const respostas = [];
+      while (valorGigante > BigInt(0)) {
+        const valor = Number(valorGigante % BigInt(4096));
+        valorGigante = valorGigante / BigInt(4096);
+        
+        const catIndex = (valor >> 9) & 7; // 3 bits
+        const pergIndex = (valor >> 3) & 63; // 6 bits
+        const darReceberCombinado = valor & 7; // 3 bits
+        
+        // Decodificar dar+receber combinados - CORREÇÃO AQUI!
+        const darIndex = Math.floor(darReceberCombinado / 7);
+        const receberIndex = darReceberCombinado % 7;
+        
+        console.log('Resposta:', { catIndex, pergIndex, darIndex, receberIndex });
+        
+        const categoria = categorias[catIndex];
+        if (categoria && perguntas[categoria] && perguntas[categoria][pergIndex]) {
+          respostas.unshift({ // unshift porque estamos extraindo de trás para frente
+            categoria: categoria,
+            pergunta: perguntas[categoria][pergIndex],
+            dar: respostasMap[darIndex] || 'N/A',
+            receber: respostasMap[receberIndex] || 'N/A'
+          });
+        }
       }
+      
+      console.log('Respostas descomprimidas:', respostas);
+      
+      const posicoes = ['Top', 'Switch', 'bottom', 'Sádico', 'Masoquista', 'Fetichista', 'Outros'];
+      const dores = ['Muito Baixa', 'Baixa', 'Média', 'Alta', 'Muito Alta', 'N/A'];
+      const experiencias = ['0-3 anos', '3-5 anos', '5-7 anos', '7-10 anos', '10+ anos'];
+      const sexualidades = ['Heterossexual', 'Homossexual', 'Bissexual', 'Pansexual', 'Assexual', 'Demissexual', 'Outros'];
+      
+      const resultado = {
+        respostas: respostas,
+        perfil: {
+          posicao: posicoes[posicaoIndex] || 'Top',
+          dor: dores[dorIndex] || 'Média', 
+          teorica: experiencias[teoricaIndex] || '0-3 anos',
+          pratica: experiencias[praticaIndex] || '0-3 anos',
+          sexualidade: sexualidades[4] || 'Heterossexual' // Fixo por enquanto
+        },
+        timestamp: new Date().toISOString()
+      };
+      
+      console.log('Resultado final:', resultado);
+      return resultado;
+      
+    } catch (error) {
+      console.error('Erro na descompressão:', error);
+      return null;
     }
-    
-    const posicoes = ['Top', 'Switch', 'bottom', 'Sádico', 'Masoquista', 'Fetichista', 'Outros'];
-    const dores = ['Muito Baixa', 'Baixa', 'Média', 'Alta', 'Muito Alta', 'N/A'];
-    const experiencias = ['0-3 anos', '3-5 anos', '5-7 anos', '7-10 anos', '10+ anos'];
-    const sexualidades = ['Heterossexual', 'Homossexual', 'Bissexual', 'Pansexual', 'Assexual', 'Demissexual', 'Outros'];
-    
-    return {
-      respostas: respostas,
-      perfil: {
-        posicao: posicoes[posicaoIndex] || 'Top',
-        dor: dores[dorIndex] || 'Média', 
-        teorica: experiencias[teoricaIndex] || '0-3 anos',
-        pratica: experiencias[praticaIndex] || '0-3 anos',
-        sexualidade: sexualidades[sexualidadeIndex] || 'Heterossexual'
-      },
-      timestamp: new Date().toISOString()
-    };
   }
 
   function gerarLinkCompartilhamento() {
@@ -1704,20 +1744,32 @@ function proximaPergunta() {
       }
     }
     
-    if (hash.length > 5 && !hash.includes('=') && !hash.includes(':')) {
-      // Formato EXTREMO - Base64 customizado (novo)
+    if (hash.startsWith('#') && hash.length > 5) {
+      // Formato NOVO - BigInt comprimido
       try {
         const dadosComprimidos = hash.substring(1);
-        const dados = descomprimirDados(dadosComprimidos);
-        processarResultadoCompartilhado(dados);
-        return true;
+        console.log('Tentando descomprimir:', dadosComprimidos);
+        
+        // Verificar se todos os caracteres são válidos do nosso base64
+        const caracteresValidos = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+        const ehFormatoNovo = dadosComprimidos.split('').every(char => caracteresValidos.includes(char));
+        
+        if (ehFormatoNovo) {
+          const dados = descomprimirDados(dadosComprimidos);
+          console.log('Dados descomprimidos:', dados);
+          
+          if (dados && dados.respostas && dados.respostas.length > 0) {
+            processarResultadoCompartilhado(dados);
+            return true;
+          }
+        }
       } catch (error) {
-        console.error('Erro no formato extremo:', error);
+        console.error('Erro no formato novo:', error);
       }
     }
     
+    // Tentar formato ultra anterior como fallback
     if (hash.startsWith('#') && hash.length > 10) {
-      // Formato ultra comprimido (anterior)
       try {
         let dadosBase64 = hash.substring(1);
         while (dadosBase64.length % 4) {
