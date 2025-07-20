@@ -1426,7 +1426,7 @@ function proximaPergunta() {
       // Usar BigInt para números muito grandes e compressão extrema
       let valorGigante = BigInt(0);
       
-      // Comprimir cada resposta em 12 bits
+      // Comprimir cada resposta em 15 bits (voltando ao formato mais seguro)
       dados.respostas.forEach((r, index) => {
         console.log(`Comprimindo resposta ${index}:`, r);
         
@@ -1437,26 +1437,26 @@ function proximaPergunta() {
         
         console.log('Índices:', { catIndex, perguntaIndex, darIndex, receberIndex });
         
-        // CORREÇÃO: Combinar dar+receber corretamente (49 combinações = 6 bits, não 3)
-        const darReceberCombinado = darIndex * 7 + receberIndex;
-        const valor = (catIndex << 9) | (perguntaIndex << 3) | (darReceberCombinado & 7);
+        // 3 bits categoria + 6 bits pergunta + 3 bits dar + 3 bits receber = 15 bits
+        const valor = (catIndex << 12) | (perguntaIndex << 6) | (darIndex << 3) | receberIndex;
         
-        console.log('Valor comprimido:', valor);
+        console.log('Valor comprimido:', valor, 'binário:', valor.toString(2));
         
-        valorGigante = valorGigante * BigInt(4096) + BigInt(valor);
+        valorGigante = valorGigante * BigInt(32768) + BigInt(valor); // 2^15 = 32768
       });
       
-      // Adicionar perfil (12 bits total)
+      // Adicionar perfil (15 bits total)
       const posicaoIndex = ['Top', 'Switch', 'bottom', 'Sádico', 'Masoquista', 'Fetichista', 'Outros'].indexOf(dados.perfil.posicao);
       const dorIndex = ['Muito Baixa', 'Baixa', 'Média', 'Alta', 'Muito Alta', 'N/A'].indexOf(dados.perfil.dor);
       const teoricaIndex = ['0-3 anos', '3-5 anos', '5-7 anos', '7-10 anos', '10+ anos'].indexOf(dados.perfil.teorica);
       const praticaIndex = ['0-3 anos', '3-5 anos', '5-7 anos', '7-10 anos', '10+ anos'].indexOf(dados.perfil.pratica);
+      const sexualidadeIndex = ['Heterossexual', 'Homossexual', 'Bissexual', 'Pansexual', 'Assexual', 'Demissexual', 'Outros'].indexOf(dados.perfil.sexualidade);
       
-      console.log('Perfil índices:', { posicaoIndex, dorIndex, teoricaIndex, praticaIndex });
+      console.log('Perfil índices:', { posicaoIndex, dorIndex, teoricaIndex, praticaIndex, sexualidadeIndex });
       
-      // Comprimir perfil: 3+3+3+3 = 12 bits
-      const perfilValor = (posicaoIndex << 9) | (dorIndex << 6) | (teoricaIndex << 3) | praticaIndex;
-      valorGigante = valorGigante * BigInt(4096) + BigInt(perfilValor);
+      // Comprimir perfil: 3+3+3+3+3 = 15 bits
+      const perfilValor = (posicaoIndex << 12) | (dorIndex << 9) | (teoricaIndex << 6) | (praticaIndex << 3) | sexualidadeIndex;
+      valorGigante = valorGigante * BigInt(32768) + BigInt(perfilValor);
       
       console.log('Valor gigante final:', valorGigante.toString());
       
@@ -1499,34 +1499,34 @@ function proximaPergunta() {
       const respostasMap = ['N/A', 'Nunca experimentei', 'Adoro', 'Aproveito', 'Aceito', 'Tolero', 'Limite rígido'];
       const categorias = Object.keys(perguntas);
       
-      // Primeiro extrair perfil (últimos 12 bits)
-      const perfilValor = Number(valorGigante % BigInt(4096));
-      valorGigante = valorGigante / BigInt(4096);
+      // Primeiro extrair perfil (últimos 15 bits)
+      const perfilValor = Number(valorGigante % BigInt(32768)); // 2^15 = 32768
+      valorGigante = valorGigante / BigInt(32768);
       
-      console.log('Perfil valor:', perfilValor);
+      console.log('Perfil valor:', perfilValor, 'binário:', perfilValor.toString(2));
       
-      const posicaoIndex = (perfilValor >> 9) & 7;
-      const dorIndex = (perfilValor >> 6) & 7;
-      const teoricaIndex = (perfilValor >> 3) & 7;
-      const praticaIndex = perfilValor & 7;
+      const posicaoIndex = (perfilValor >> 12) & 7; // 3 bits
+      const dorIndex = (perfilValor >> 9) & 7; // 3 bits
+      const teoricaIndex = (perfilValor >> 6) & 7; // 3 bits
+      const praticaIndex = (perfilValor >> 3) & 7; // 3 bits
+      const sexualidadeIndex = perfilValor & 7; // 3 bits
       
-      console.log('Índices do perfil:', { posicaoIndex, dorIndex, teoricaIndex, praticaIndex });
+      console.log('Índices do perfil:', { posicaoIndex, dorIndex, teoricaIndex, praticaIndex, sexualidadeIndex });
       
       // Descomprimir respostas
       const respostas = [];
       while (valorGigante > BigInt(0)) {
-        const valor = Number(valorGigante % BigInt(4096));
-        valorGigante = valorGigante / BigInt(4096);
+        const valor = Number(valorGigante % BigInt(32768)); // 2^15 = 32768
+        valorGigante = valorGigante / BigInt(32768);
         
-        const catIndex = (valor >> 9) & 7; // 3 bits
-        const pergIndex = (valor >> 3) & 63; // 6 bits
-        const darReceberCombinado = valor & 7; // 3 bits
+        console.log('Valor da resposta:', valor, 'binário:', valor.toString(2));
         
-        // Decodificar dar+receber combinados - CORREÇÃO AQUI!
-        const darIndex = Math.floor(darReceberCombinado / 7);
-        const receberIndex = darReceberCombinado % 7;
+        const catIndex = (valor >> 12) & 7; // 3 bits
+        const pergIndex = (valor >> 6) & 63; // 6 bits
+        const darIndex = (valor >> 3) & 7; // 3 bits
+        const receberIndex = valor & 7; // 3 bits
         
-        console.log('Resposta:', { catIndex, pergIndex, darIndex, receberIndex });
+        console.log('Resposta decodificada:', { catIndex, pergIndex, darIndex, receberIndex });
         
         const categoria = categorias[catIndex];
         if (categoria && perguntas[categoria] && perguntas[categoria][pergIndex]) {
@@ -1553,7 +1553,7 @@ function proximaPergunta() {
           dor: dores[dorIndex] || 'Média', 
           teorica: experiencias[teoricaIndex] || '0-3 anos',
           pratica: experiencias[praticaIndex] || '0-3 anos',
-          sexualidade: sexualidades[4] || 'Heterossexual' // Fixo por enquanto
+          sexualidade: sexualidades[sexualidadeIndex] || 'Heterossexual'
         },
         timestamp: new Date().toISOString()
       };
