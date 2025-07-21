@@ -833,8 +833,50 @@
       }
       
       .question-header, .response-row {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 2fr 1fr;
         text-align: center;
+        gap: 0.5rem;
+      }
+
+      .question-header {
+        padding: 0.8rem 0.5rem;
+      }
+
+      .column-header {
+        font-size: 0.9rem;
+        padding: 0.6rem 0.3rem;
+      }
+
+      .response-row {
+        padding: 0.8rem 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .response-text {
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 0.5rem;
+      }
+
+      .response-switch {
+        display: flex;
+        justify-content: center;
+      }
+
+      .switch {
+        width: 45px;
+        height: 23px;
+      }
+
+      .slider:before {
+        height: 17px;
+        width: 17px;
+        left: 3px;
+        bottom: 3px;
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(19px);
       }
     }
   </style>
@@ -1181,6 +1223,10 @@
       const container = document.getElementById('questionResponses');
       container.innerHTML = '';
       
+      // Obter classificação atual para labels mobile
+      const categoriaAtual = listaPerguntas[indice]?.categoria;
+      const classificacao = classificacoesPorCategoria[categoriaAtual];
+      
       respostas.forEach(resposta => {
         const responseRow = document.createElement('div');
         responseRow.className = 'response-row';
@@ -1189,6 +1235,7 @@
         // Switch DAR
         const darSwitch = document.createElement('div');
         darSwitch.className = 'response-switch';
+        darSwitch.setAttribute('data-label', classificacao ? classificacao.tipo1 : 'DAR');
         darSwitch.innerHTML = `
           <label class="switch">
             <input type="checkbox" id="dar-${resposta.replace(/\s+/g, '-').toLowerCase()}-${indice}">
@@ -1204,6 +1251,7 @@
         // Switch RECEBER
         const receberSwitch = document.createElement('div');
         receberSwitch.className = 'response-switch';
+        receberSwitch.setAttribute('data-label', classificacao ? classificacao.tipo2 : 'RECEBER');
         receberSwitch.innerHTML = `
           <label class="switch">
             <input type="checkbox" id="receber-${resposta.replace(/\s+/g, '-').toLowerCase()}-${indice}">
