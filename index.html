@@ -158,12 +158,29 @@
       box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
 
+    .btn-modo-escuro {
+      margin-top: 0;
+      padding: 0.6rem 1.2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
     }
 
-    .dark .btn {
+    .dark .btn-modo-escuro {
       background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
       box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
     }
@@ -172,11 +189,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 2rem;
+      margin-bottom: 0.7rem;
       background: rgba(255, 255, 255, 0.9);
-      padding: 1rem;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      padding: 0.35rem 0.525rem; /* Padding vertical reduzido 30%: de 0.525rem para 0.35rem, horizontal mantido */
+      border-radius: 7px;
+      box-shadow: 0 1.4px 7px rgba(0, 0, 0, 0.056);
     }
 
     .dark .top-bar {
@@ -184,8 +201,8 @@
     }
 
     .creditos {
-      font-size: 1.1rem;
-      font-weight: 700;
+      font-size: 1.25rem; /* Aumentado 25% de 1rem para 1.25rem */
+      font-weight: 600;
       color: #2c3e50;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       -webkit-background-clip: text;
@@ -634,7 +651,134 @@
       font-weight: 600;
     }
 
-    /* Cores para modo escuro - células da tabela */
+    /* Estilos para o resumo do perfil selecionado */
+    .resumo-perfil-selecionado {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .dark .resumo-perfil-selecionado {
+      background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    }
+
+    .resumo-perfil-selecionado h3 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #2c3e50;
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .dark .resumo-perfil-selecionado h3 {
+      color: #ecf0f1;
+    }
+
+    .resumo-perfil-selecionado h4 {
+      margin: 1.5rem 0 1rem 0;
+      color: #667eea;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border-left: 4px solid #667eea;
+      padding-left: 1rem;
+    }
+
+    .dark .resumo-perfil-selecionado h4 {
+      color: #3498db;
+      border-left-color: #3498db;
+    }
+
+    .perfil-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .perfil-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .perfil-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .dark .perfil-card {
+      background: #2c3e50;
+    }
+
+    .perfil-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .perfil-label {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .dark .perfil-label {
+      color: #bdc3c7;
+    }
+
+    .perfil-valor {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+
+    .dark .perfil-valor {
+      color: #ecf0f1;
+    }
+
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tag {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .tag-relacionamento {
+      background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+    }
+
+    .tag-local {
+      background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    }
+
+    .tag-categoria {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .dark .tag-relacionamento {
+      background: linear-gradient(135deg, #e91e63 0%, #ad1457 100%);
+    }
+
+    .dark .tag-local {
+      background: linear-gradient(135deg, #ff9800 0%, #e65100 100%);
+    }
+
+    .dark .tag-categoria {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    }
     .dark td[data-resposta="Nunca experimentei"] {
       background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%) !important;
       color: white;
@@ -699,7 +843,7 @@
   <div class="container">
     <div class="top-bar">
       <div class="creditos">Desenvolvido por HerrKrieg e Jakehimura</div>
-      <button onclick="document.body.classList.toggle('dark')" class="btn">🌙 Modo Claro/Escuro</button>
+      <button onclick="document.body.classList.toggle('dark')" class="btn-modo-escuro">🌙 Modo Claro/Escuro</button>
     </div>
 
     <div class="section">
@@ -1229,6 +1373,9 @@
         }
       });
 
+      // Adicionar resumo do perfil
+      adicionarResumoPerfilSelecionado(resumo);
+
       // Adicionar estatísticas gerais
       adicionarEstatisticasGerais(resumo, respostasFiltradas);
 
@@ -1265,6 +1412,79 @@
         
         resumo.appendChild(secao);
       }
+    }
+
+    function adicionarResumoPerfilSelecionado(container) {
+      // Coletar dados selecionados
+      const perfilSelecionado = {
+        posicao: document.getElementById('posicao').value,
+        dor: document.getElementById('dor').value,
+        teorica: document.getElementById('teorica').value,
+        pratica: document.getElementById('pratica').value
+      };
+
+      // Coletar relacionamentos selecionados
+      const relacionamentosSelecionados = Array.from(
+        document.querySelectorAll('.section:nth-child(3) .toggle.active')
+      ).map(btn => btn.textContent);
+
+      // Coletar locais selecionados
+      const locaisSelecionados = Array.from(
+        document.querySelectorAll('.section:nth-child(4) .toggle.active')
+      ).map(btn => btn.textContent);
+
+      // Coletar categorias respondidas
+      const categoriasRespondidas = [...new Set(respostasUsuario.map(r => r.categoria))];
+
+      const resumoDiv = document.createElement('div');
+      resumoDiv.className = 'resumo-perfil-selecionado';
+      
+      resumoDiv.innerHTML = `
+        <h3>👤 Seu Perfil</h3>
+        <div class="perfil-grid">
+          <div class="perfil-card">
+            <div class="perfil-icon">🎯</div>
+            <div class="perfil-label">Posição</div>
+            <div class="perfil-valor">${perfilSelecionado.posicao}</div>
+          </div>
+          <div class="perfil-card">
+            <div class="perfil-icon">⚡</div>
+            <div class="perfil-label">Tolerância à Dor</div>
+            <div class="perfil-valor">${perfilSelecionado.dor}</div>
+          </div>
+          <div class="perfil-card">
+            <div class="perfil-icon">📚</div>
+            <div class="perfil-label">Experiência Teórica</div>
+            <div class="perfil-valor">${perfilSelecionado.teorica}</div>
+          </div>
+          <div class="perfil-card">
+            <div class="perfil-icon">🔥</div>
+            <div class="perfil-label">Experiência Prática</div>
+            <div class="perfil-valor">${perfilSelecionado.pratica}</div>
+          </div>
+        </div>
+
+        ${relacionamentosSelecionados.length > 0 ? `
+        <h4>💕 Tipos de Relacionamento</h4>
+        <div class="tags-container">
+          ${relacionamentosSelecionados.map(rel => `<span class="tag tag-relacionamento">${rel}</span>`).join('')}
+        </div>
+        ` : ''}
+
+        ${locaisSelecionados.length > 0 ? `
+        <h4>📍 Locais de Interesse</h4>
+        <div class="tags-container">
+          ${locaisSelecionados.map(local => `<span class="tag tag-local">${local}</span>`).join('')}
+        </div>
+        ` : ''}
+
+        <h4>📋 Categorias Respondidas</h4>
+        <div class="tags-container">
+          ${categoriasRespondidas.map(cat => `<span class="tag tag-categoria">${cat}</span>`).join('')}
+        </div>
+      `;
+      
+      container.appendChild(resumoDiv);
     }
 
     function criarTabelaResultado(dados, titulo, categoria) {
