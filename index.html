@@ -1289,7 +1289,7 @@
 
     function comprimirRespostas() {
       const respostasMap = ['N/A', 'Nunca experimentei', 'Adoro', 'Aproveito', 'Aceito', 'Tolero', 'Limite rígido'];
-      const categoriasMap = Object.keys(perguntas);
+      const categoriasMap = ['Atos sexuais', 'Bondage', 'Sadismo e Masoquismo', 'Dominação e Submissão', 'Role Play', 'Fetiches', 'Equipamentos'];
       
       // Comprimir respostas
       const respostasComprimidas = respostasUsuario.map(r => {
@@ -1297,8 +1297,15 @@
         const pergIndex = perguntas[r.categoria].indexOf(r.pergunta);
         const darIndex = respostasMap.indexOf(r.dar);
         const receberIndex = respostasMap.indexOf(r.receber);
+        
+        // Verificar se todos os índices são válidos
+        if (catIndex === -1 || pergIndex === -1 || darIndex === -1 || receberIndex === -1) {
+          console.warn('Erro ao comprimir resposta:', r);
+          return null;
+        }
+        
         return `${catIndex}:${pergIndex}:${darIndex}:${receberIndex}`;
-      }).join('|');
+      }).filter(item => item !== null).join('|');
       
       // Comprimir perfil
       const posicoes = ['Top', 'Switch', 'bottom', 'Sádico', 'Masoquista', 'Fetichista', 'Outros'];
@@ -1321,6 +1328,7 @@
     // Verificar resultado compartilhado ao carregar a página
     function verificarResultadoCompartilhado() {
       const hash = window.location.hash;
+      console.log('Hash detectado:', hash);
       
       if (hash.startsWith('#dados=')) {
         try {
@@ -1328,6 +1336,7 @@
           const dadosJson = decodeURIComponent(atob(dadosBase64));
           const dados = JSON.parse(dadosJson);
           
+          console.log('Dados JSON carregados:', dados);
           processarResultadoCompartilhado(dados);
           return true;
         } catch (error) {
@@ -1340,8 +1349,19 @@
       if (hash.startsWith('#r=')) {
         try {
           const dadosBase64 = hash.substring(3);
+          console.log('Base64 recebido:', dadosBase64);
+          
           const dadosComprimidos = atob(dadosBase64);
+          console.log('Dados descomprimidos:', dadosComprimidos);
+          
           const dados = descomprimirDados(dadosComprimidos);
+          console.log('Dados finais processados:', dados);
+          
+          if (dados.respostas.length === 0) {
+            console.error('Nenhuma resposta válida encontrada');
+            mostrarMensagemErro();
+            return false;
+          }
           
           processarResultadoCompartilhado(dados);
           return true;
@@ -1359,18 +1379,25 @@
       const [respostasStr, perfilStr] = dadosComprimidos.split('#');
       
       const respostasMap = ['N/A', 'Nunca experimentei', 'Adoro', 'Aproveito', 'Aceito', 'Tolero', 'Limite rígido'];
-      const categoriasMap = Object.keys(perguntas);
+      const categoriasMap = ['Atos sexuais', 'Bondage', 'Sadismo e Masoquismo', 'Dominação e Submissão', 'Role Play', 'Fetiches', 'Equipamentos'];
       
       const respostas = respostasStr.split('|').map(item => {
-        const [catIndex, pergIndex, darIndex, receberIndex] = item.split(':');
-        const categoria = categoriasMap[parseInt(catIndex)];
+        const [catIndex, pergIndex, darIndex, receberIndex] = item.split(':').map(x => parseInt(x));
+        const categoria = categoriasMap[catIndex];
+        
+        // Verificar se a categoria e pergunta existem
+        if (!categoria || !perguntas[categoria] || !perguntas[categoria][pergIndex]) {
+          console.warn(`Pergunta não encontrada: categoria ${catIndex}, pergunta ${pergIndex}`);
+          return null;
+        }
+        
         return {
           categoria: categoria,
-          pergunta: perguntas[categoria][parseInt(pergIndex)],
-          dar: respostasMap[parseInt(darIndex)],
-          receber: respostasMap[parseInt(receberIndex)]
+          pergunta: perguntas[categoria][pergIndex],
+          dar: respostasMap[darIndex] || 'N/A',
+          receber: respostasMap[receberIndex] || 'N/A'
         };
-      });
+      }).filter(item => item !== null); // Filtrar itens inválidos
       
       const perfilIndices = perfilStr.split(',').map(x => parseInt(x));
       const posicoes = ['Top', 'Switch', 'bottom', 'Sádico', 'Masoquista', 'Fetichista', 'Outros'];
