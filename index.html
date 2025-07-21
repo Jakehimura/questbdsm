@@ -254,6 +254,78 @@
       border-color: #7f8c8d;
     }
 
+    /* Sistema de cores semáforo para as alternativas */
+    .response-row[data-resposta="N/A"] {
+      background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+      border-color: #95a5a6;
+    }
+
+    .response-row[data-resposta="Nunca experimentei"] {
+      background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
+      border-color: #bdc3c7;
+    }
+
+    .response-row[data-resposta="Adoro"] {
+      background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+      border-color: #27ae60;
+    }
+
+    .response-row[data-resposta="Aproveito"] {
+      background: linear-gradient(135deg, #58d68d 0%, #82e0aa 100%);
+      border-color: #58d68d;
+    }
+
+    .response-row[data-resposta="Aceito"] {
+      background: linear-gradient(135deg, #f7dc6f 0%, #f4d03f 100%);
+      border-color: #f7dc6f;
+    }
+
+    .response-row[data-resposta="Tolero"] {
+      background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+      border-color: #e67e22;
+    }
+
+    .response-row[data-resposta="Limite rígido"] {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      border-color: #e74c3c;
+    }
+
+    /* Cores para modo escuro */
+    .dark .response-row[data-resposta="N/A"] {
+      background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+      border-color: #95a5a6;
+    }
+
+    .dark .response-row[data-resposta="Nunca experimentei"] {
+      background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
+      border-color: #bdc3c7;
+    }
+
+    .dark .response-row[data-resposta="Adoro"] {
+      background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+      border-color: #27ae60;
+    }
+
+    .dark .response-row[data-resposta="Aproveito"] {
+      background: linear-gradient(135deg, #58d68d 0%, #82e0aa 100%);
+      border-color: #58d68d;
+    }
+
+    .dark .response-row[data-resposta="Aceito"] {
+      background: linear-gradient(135deg, #f7dc6f 0%, #f4d03f 100%);
+      border-color: #f7dc6f;
+    }
+
+    .dark .response-row[data-resposta="Tolero"] {
+      background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+      border-color: #e67e22;
+    }
+
+    .dark .response-row[data-resposta="Limite rígido"] {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      border-color: #e74c3c;
+    }
+
     .response-text {
       text-align: center;
       font-weight: 600;
@@ -771,6 +843,7 @@
     let respostasUsuario = [];
     let respostaDarAtual = null;
     let respostaReceberAtual = null;
+    let voltouPergunta = false;
 
     // Configuração dos botões toggle
     document.addEventListener('DOMContentLoaded', function() {
@@ -791,6 +864,7 @@
       listaPerguntas = [];
       respostasUsuario = [];
       indice = 0;
+      voltouPergunta = false;
       
       selecionadas.forEach(cat => {
         if (perguntas[cat]) {
@@ -832,6 +906,7 @@
       respostas.forEach(resposta => {
         const responseRow = document.createElement('div');
         responseRow.className = 'response-row';
+        responseRow.setAttribute('data-resposta', resposta);
         
         // Switch DAR
         const darSwitch = document.createElement('div');
@@ -909,13 +984,21 @@
       const btnProximo = document.querySelector('.btn-proximo');
       
       if (respostaDarAtual && respostaReceberAtual) {
-        if (!btnProximo) {
-          const navButtons = document.querySelector('.navigation-buttons');
-          const novoBtn = document.createElement('button');
-          novoBtn.className = 'nav-btn btn-proximo';
-          novoBtn.textContent = '➡️ Próximo';
-          novoBtn.onclick = proximaPergunta;
-          navButtons.appendChild(novoBtn);
+        if (voltouPergunta) {
+          // Se voltou, mostra botão próximo
+          if (!btnProximo) {
+            const navButtons = document.querySelector('.navigation-buttons');
+            const novoBtn = document.createElement('button');
+            novoBtn.className = 'nav-btn btn-proximo';
+            novoBtn.textContent = '➡️ Próximo';
+            novoBtn.onclick = proximaPergunta;
+            navButtons.appendChild(novoBtn);
+          }
+        } else {
+          // Uso normal = auto-avanço
+          setTimeout(() => {
+            proximaPergunta();
+          }, 500);
         }
       } else {
         if (btnProximo) {
@@ -927,6 +1010,12 @@
     function proximaPergunta() {
       if (!respostaDarAtual || !respostaReceberAtual) {
         return;
+      }
+      
+      voltouPergunta = false;
+      const btnProximo = document.querySelector('.btn-proximo');
+      if (btnProximo) {
+        btnProximo.remove();
       }
       
       const atual = listaPerguntas[indice];
@@ -949,6 +1038,7 @@
     function anteriorPergunta() {
       if (indice > 0) {
         indice--;
+        voltouPergunta = true;
         mostrarPergunta();
       }
     }
@@ -1133,32 +1223,18 @@
       return stats;
     }
 
-    // Sistema de compartilhamento simples
+    // Sistema de compartilhamento otimizado
     function copiarLinkCompartilhamento() {
       const botao = event.target;
       const textoOriginal = botao.textContent;
       
       try {
-        const dadosParaCompartilhar = {
-          respostas: respostasUsuario,
-          perfil: {
-            posicao: document.getElementById('posicao').value,
-            dor: document.getElementById('dor').value,
-            teorica: document.getElementById('teorica').value,
-            pratica: document.getElementById('pratica').value,
-            sexualidade: document.getElementById('sexualidade').value
-          },
-          timestamp: new Date().toISOString(),
-          version: '4.0'
-        };
-        
-        // Comprimir dados usando JSON + Base64
-        const dadosJson = JSON.stringify(dadosParaCompartilhar);
-        const dadosComprimidos = btoa(encodeURIComponent(dadosJson));
+        // Criar dados comprimidos
+        const dadosComprimidos = comprimirRespostas();
         
         // Gerar link
         const urlAtual = window.location.href.split('#')[0];
-        const link = `${urlAtual}#dados=${dadosComprimidos}`;
+        const link = `${urlAtual}#r=${dadosComprimidos}`;
         
         // Copiar para clipboard
         navigator.clipboard.writeText(link).then(() => {
@@ -1187,6 +1263,12 @@
           botao.textContent = '✅ Link Copiado!';
           botao.style.background = '#27ae60';
           
+          // Mostrar link gerado
+          const linkDiv = document.getElementById('linkGerado');
+          const linkTexto = document.getElementById('linkTexto');
+          linkTexto.textContent = link;
+          linkDiv.style.display = 'block';
+          
           setTimeout(() => {
             botao.textContent = textoOriginal;
             botao.style.background = '';
@@ -1203,6 +1285,37 @@
           botao.style.background = '';
         }, 3000);
       }
+    }
+
+    function comprimirRespostas() {
+      const respostasMap = ['N/A', 'Nunca experimentei', 'Adoro', 'Aproveito', 'Aceito', 'Tolero', 'Limite rígido'];
+      const categoriasMap = Object.keys(perguntas);
+      
+      // Comprimir respostas
+      const respostasComprimidas = respostasUsuario.map(r => {
+        const catIndex = categoriasMap.indexOf(r.categoria);
+        const pergIndex = perguntas[r.categoria].indexOf(r.pergunta);
+        const darIndex = respostasMap.indexOf(r.dar);
+        const receberIndex = respostasMap.indexOf(r.receber);
+        return `${catIndex}:${pergIndex}:${darIndex}:${receberIndex}`;
+      }).join('|');
+      
+      // Comprimir perfil
+      const posicoes = ['Top', 'Switch', 'bottom', 'Sádico', 'Masoquista', 'Fetichista', 'Outros'];
+      const dores = ['Muito Baixa', 'Baixa', 'Média', 'Alta', 'Muito Alta', 'N/A'];
+      const experiencias = ['0-3 anos', '3-5 anos', '5-7 anos', '7-10 anos', '10+ anos'];
+      const sexualidades = ['Heterossexual', 'Homossexual', 'Bissexual', 'Pansexual', 'Assexual', 'Demissexual', 'Outros'];
+      
+      const perfilComprimido = [
+        posicoes.indexOf(document.getElementById('posicao').value),
+        dores.indexOf(document.getElementById('dor').value),
+        experiencias.indexOf(document.getElementById('teorica').value),
+        experiencias.indexOf(document.getElementById('pratica').value),
+        sexualidades.indexOf(document.getElementById('sexualidade').value)
+      ].join(',');
+      
+      const dadosFinais = `${respostasComprimidas}#${perfilComprimido}`;
+      return btoa(dadosFinais);
     }
 
     // Verificar resultado compartilhado ao carregar a página
@@ -1224,7 +1337,58 @@
         }
       }
       
+      if (hash.startsWith('#r=')) {
+        try {
+          const dadosBase64 = hash.substring(3);
+          const dadosComprimidos = atob(dadosBase64);
+          const dados = descomprimirDados(dadosComprimidos);
+          
+          processarResultadoCompartilhado(dados);
+          return true;
+        } catch (error) {
+          console.error('Erro ao carregar resultado comprimido:', error);
+          mostrarMensagemErro();
+          return false;
+        }
+      }
+      
       return false;
+    }
+
+    function descomprimirDados(dadosComprimidos) {
+      const [respostasStr, perfilStr] = dadosComprimidos.split('#');
+      
+      const respostasMap = ['N/A', 'Nunca experimentei', 'Adoro', 'Aproveito', 'Aceito', 'Tolero', 'Limite rígido'];
+      const categoriasMap = Object.keys(perguntas);
+      
+      const respostas = respostasStr.split('|').map(item => {
+        const [catIndex, pergIndex, darIndex, receberIndex] = item.split(':');
+        const categoria = categoriasMap[parseInt(catIndex)];
+        return {
+          categoria: categoria,
+          pergunta: perguntas[categoria][parseInt(pergIndex)],
+          dar: respostasMap[parseInt(darIndex)],
+          receber: respostasMap[parseInt(receberIndex)]
+        };
+      });
+      
+      const perfilIndices = perfilStr.split(',').map(x => parseInt(x));
+      const posicoes = ['Top', 'Switch', 'bottom', 'Sádico', 'Masoquista', 'Fetichista', 'Outros'];
+      const dores = ['Muito Baixa', 'Baixa', 'Média', 'Alta', 'Muito Alta', 'N/A'];
+      const experiencias = ['0-3 anos', '3-5 anos', '5-7 anos', '7-10 anos', '10+ anos'];
+      const sexualidades = ['Heterossexual', 'Homossexual', 'Bissexual', 'Pansexual', 'Assexual', 'Demissexual', 'Outros'];
+      
+      return {
+        respostas: respostas,
+        perfil: {
+          posicao: posicoes[perfilIndices[0]] || 'Top',
+          dor: dores[perfilIndices[1]] || 'Média',
+          teorica: experiencias[perfilIndices[2]] || '0-3 anos',
+          pratica: experiencias[perfilIndices[3]] || '0-3 anos',
+          sexualidade: sexualidades[perfilIndices[4]] || 'Heterossexual'
+        },
+        timestamp: new Date().toISOString()
+      };
     }
 
     function processarResultadoCompartilhado(dados) {
