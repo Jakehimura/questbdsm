@@ -567,7 +567,7 @@
     th, td {
       border: 1px solid #e0e0e0;
       padding: 0.8rem;
-      text-align: left;
+      text-align: center;
     }
 
     .dark th, .dark td {
@@ -575,13 +575,16 @@
     }
 
     th {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      background: transparent;
+      color: #2c3e50;
       font-weight: 600;
+      border-bottom: 2px solid #e0e0e0;
     }
 
     .dark th {
-      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      background: transparent;
+      color: #ecf0f1;
+      border-bottom: 2px solid #7f8c8d;
     }
 
     .resultado-categoria h3 {
@@ -589,9 +592,77 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      font-size: 1.5rem;
+      font-size: 1.8rem; /* Aumentado de 1.5rem para 1.8rem (+20%) */
       font-weight: 700;
       margin: 2rem 0 1rem 0;
+    }
+
+    /* Cores do semáforo para células da tabela nos resultados */
+    td[data-resposta="Nunca experimentei"] {
+      background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%) !important;
+      color: white;
+      font-weight: 600;
+    }
+
+    td[data-resposta="Adoro"] {
+      background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%) !important;
+      color: white;
+      font-weight: 600;
+    }
+
+    td[data-resposta="Aproveito"] {
+      background: linear-gradient(135deg, #58d68d 0%, #82e0aa 100%) !important;
+      color: white;
+      font-weight: 600;
+    }
+
+    td[data-resposta="Aceito"] {
+      background: linear-gradient(135deg, #f7dc6f 0%, #f4d03f 100%) !important;
+      color: #2c3e50;
+      font-weight: 600;
+    }
+
+    td[data-resposta="Tolero"] {
+      background: linear-gradient(135deg, #e67e22 0%, #d35400 100%) !important;
+      color: white;
+      font-weight: 600;
+    }
+
+    td[data-resposta="Limite rígido"] {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+      color: white;
+      font-weight: 600;
+    }
+
+    /* Cores para modo escuro - células da tabela */
+    .dark td[data-resposta="Nunca experimentei"] {
+      background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%) !important;
+      color: white;
+    }
+
+    .dark td[data-resposta="Adoro"] {
+      background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%) !important;
+      color: white;
+    }
+
+    .dark td[data-resposta="Aproveito"] {
+      background: linear-gradient(135deg, #58d68d 0%, #82e0aa 100%) !important;
+      color: white;
+    }
+
+    .dark td[data-resposta="Aceito"] {
+      background: linear-gradient(135deg, #f7dc6f 0%, #f4d03f 100%) !important;
+      color: #2c3e50;
+    }
+
+    .dark td[data-resposta="Tolero"] {
+      background: linear-gradient(135deg, #e67e22 0%, #d35400 100%) !important;
+      color: white;
+    }
+
+    .dark td[data-resposta="Limite rígido"] {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+      color: white;
     }
 
     .modo-visualizacao {
@@ -672,17 +743,6 @@
           <option>10+ anos</option>
         </select>
       </label>
-      <label>Orientação sexual:
-        <select id="sexualidade">
-          <option>Heterossexual</option>
-          <option>Homossexual</option>
-          <option>Bissexual</option>
-          <option>Pansexual</option>
-          <option>Assexual</option>
-          <option>Demissexual</option>
-          <option>Outros</option>
-        </select>
-      </label>
     </div>
 
     <div class="section">
@@ -758,6 +818,38 @@
   </div>
 
   <script>
+    // Mapeamento das classificações específicas por categoria
+    const classificacoesPorCategoria = {
+      'Atos sexuais': {
+        tipo1: 'RECEBER',
+        tipo2: 'FAZER'
+      },
+      'Bondage': {
+        tipo1: 'SER PRESO(A)',
+        tipo2: 'PRENDER'
+      },
+      'Sadismo e Masoquismo': {
+        tipo1: 'DAR',
+        tipo2: 'RECEBER'
+      },
+      'Dominação e Submissão': {
+        tipo1: 'MANDAR',
+        tipo2: 'OBEDECER'
+      },
+      'Role Play': {
+        tipo1: 'AUTOR',
+        tipo2: 'VÍTIMA'
+      },
+      'Fetiches': {
+        tipo1: 'FAZER',
+        tipo2: 'ASSISTIR'
+      },
+      'Equipamentos': {
+        tipo1: 'APLICAR',
+        tipo2: 'RECEBER'
+      }
+    };
+
     // Configuração das perguntas
     const perguntas = {
       "Atos sexuais": [
@@ -877,6 +969,45 @@
       mostrarPergunta();
     }
 
+    // Função para atualizar os cabeçalhos no questionário
+    function atualizarCabecalhosQuestionario() {
+      const categoriaAtual = listaPerguntas[indice]?.categoria;
+      const classificacao = classificacoesPorCategoria[categoriaAtual];
+      
+      if (classificacao) {
+        const darHeader = document.querySelector('.dar-header');
+        const receberHeader = document.querySelector('.receber-header');
+        
+        if (darHeader && receberHeader) {
+          // Definir ícones
+          const iconesTipo1 = {
+            'RECEBER': '💖',
+            'SER PRESO(A)': '🔒',
+            'DAR': '🔥',
+            'MANDAR': '👑',
+            'AUTOR': '🎭',
+            'FAZER': '🔥',
+            'APLICAR': '🔧'
+          };
+          
+          const iconesTipo2 = {
+            'FAZER': '🔥',
+            'PRENDER': '⛓️',
+            'RECEBER': '💖',
+            'OBEDECER': '🙇',
+            'VÍTIMA': '🎪',
+            'ASSISTIR': '👀'
+          };
+          
+          const iconeTipo1 = iconesTipo1[classificacao.tipo1] || '🔥';
+          const iconeTipo2 = iconesTipo2[classificacao.tipo2] || '💖';
+          
+          darHeader.innerHTML = `${iconeTipo1} ${classificacao.tipo1}`;
+          receberHeader.innerHTML = `${iconeTipo2} ${classificacao.tipo2}`;
+        }
+      }
+    }
+
     function mostrarPergunta() {
       if (indice < 0 || indice >= listaPerguntas.length) return;
       
@@ -894,6 +1025,9 @@
         respostaReceberAtual = respostasUsuario[indice].receber;
       }
 
+      // Atualizar cabeçalhos com as classificações corretas
+      atualizarCabecalhosQuestionario();
+      
       criarRespostas();
       atualizarProgresso();
       verificarBotaoProximo();
@@ -1073,25 +1207,25 @@
       respostasFiltradas.forEach(r => {
         if (!agrupado[r.categoria]) {
           agrupado[r.categoria] = {
-            dar: {},
-            receber: {}
+            tipo1: {},
+            tipo2: {}
           };
         }
         
-        // Agrupar respostas DAR (exceto N/A)
+        // Agrupar respostas TIPO1 (antigo DAR)
         if (r.dar !== 'N/A') {
-          if (!agrupado[r.categoria].dar[r.dar]) {
-            agrupado[r.categoria].dar[r.dar] = [];
+          if (!agrupado[r.categoria].tipo1[r.dar]) {
+            agrupado[r.categoria].tipo1[r.dar] = [];
           }
-          agrupado[r.categoria].dar[r.dar].push(r.pergunta);
+          agrupado[r.categoria].tipo1[r.dar].push(r.pergunta);
         }
         
-        // Agrupar respostas RECEBER (exceto N/A)
+        // Agrupar respostas TIPO2 (antigo RECEBER)
         if (r.receber !== 'N/A') {
-          if (!agrupado[r.categoria].receber[r.receber]) {
-            agrupado[r.categoria].receber[r.receber] = [];
+          if (!agrupado[r.categoria].tipo2[r.receber]) {
+            agrupado[r.categoria].tipo2[r.receber] = [];
           }
-          agrupado[r.categoria].receber[r.receber].push(r.pergunta);
+          agrupado[r.categoria].tipo2[r.receber].push(r.pergunta);
         }
       });
 
@@ -1106,32 +1240,97 @@
         secao.className = 'resultado-categoria';
         secao.innerHTML = `<h3>📋 ${categoria}</h3>`;
         
-        // Criar tabela para DAR
-        const tabelaDar = criarTabelaResultado(agrupado[categoria].dar, 'DAR');
-        secao.appendChild(tabelaDar);
+        // Obter os rótulos corretos para esta categoria
+        const classificacao = classificacoesPorCategoria[categoria];
         
-        // Criar tabela para RECEBER
-        const tabelaReceber = criarTabelaResultado(agrupado[categoria].receber, 'RECEBER');
-        secao.appendChild(tabelaReceber);
+        if (classificacao) {
+          // Criar tabela para TIPO1
+          const tabelaTipo1 = criarTabelaResultado(
+            agrupado[categoria].tipo1, 
+            classificacao.tipo1,
+            categoria
+          );
+          secao.appendChild(tabelaTipo1);
+          
+          // Criar tabela para TIPO2  
+          const tabelaTipo2 = criarTabelaResultado(
+            agrupado[categoria].tipo2, 
+            classificacao.tipo2,
+            categoria
+          );
+          secao.appendChild(tabelaTipo2);
+        } else {
+          console.error(`Classificação não encontrada para categoria: ${categoria}`);
+        }
         
         resumo.appendChild(secao);
       }
     }
 
-    function criarTabelaResultado(dados, tipo) {
+    function criarTabelaResultado(dados, titulo, categoria) {
       const container = document.createElement('div');
-      container.innerHTML = `<h4 style="margin: 1rem 0; color: ${tipo === 'DAR' ? '#e74c3c' : '#27ae60'};">${tipo === 'DAR' ? '🔥' : '💖'} ${tipo}</h4>`;
+      
+      // Definir cores baseadas na categoria e tipo
+      const coresHeader = {
+        'RECEBER': '#e74c3c',
+        'FAZER': '#27ae60', 
+        'SER PRESO(A)': '#e74c3c',
+        'PRENDER': '#27ae60',
+        'DAR': '#e74c3c',
+        'MANDAR': '#e74c3c', 
+        'OBEDECER': '#27ae60',
+        'AUTOR': '#e74c3c',
+        'VÍTIMA': '#27ae60',
+        'APLICAR': '#e74c3c',
+        'ASSISTIR': '#27ae60'
+      };
+
+      // Definir ícones baseados no tipo
+      const icones = {
+        'RECEBER': '💖',
+        'FAZER': '🔥',
+        'SER PRESO(A)': '🔒',
+        'PRENDER': '⛓️',
+        'DAR': '🔥',
+        'MANDAR': '👑',
+        'OBEDECER': '🙇',
+        'AUTOR': '🎭',
+        'VÍTIMA': '🎪',
+        'APLICAR': '🔧',
+        'ASSISTIR': '👀'
+      };
+      
+      const cor = coresHeader[titulo] || '#667eea';
+      const icone = icones[titulo] || '📋';
+      
+      container.innerHTML = `
+        <h4 style="
+          margin: 1.5rem 0 1rem 0; 
+          color: ${cor};
+          font-size: 1.2rem;
+          font-weight: 700;
+          text-align: center;
+          padding: 0.8rem;
+          background: linear-gradient(135deg, ${cor}15 0%, ${cor}05 100%);
+          border-radius: 10px;
+          border-left: 4px solid ${cor};
+        ">
+          ${icone} ${titulo}
+        </h4>
+      `;
       
       const tabela = document.createElement('table');
+      tabela.style.marginBottom = '1.5rem';
+      
       const headerRow = document.createElement('tr');
 
       // Filtrar respostas para excluir N/A
       const respostasVisiveis = respostas.filter(r => r !== 'N/A');
 
       respostasVisiveis.forEach(res => {
-        const th = document.createElement('th');
-        th.textContent = res;
-        headerRow.appendChild(th);
+          const th = document.createElement('th');
+          th.textContent = res;
+          headerRow.appendChild(th);
       });
 
       tabela.appendChild(headerRow);
@@ -1140,13 +1339,25 @@
       const maxLinhas = Math.max(...respostasVisiveis.map(r => (dados[r] || []).length));
 
       for (let i = 0; i < maxLinhas; i++) {
-        const row = document.createElement('tr');
-        respostasVisiveis.forEach(res => {
-          const td = document.createElement('td');
-          td.textContent = dados[res]?.[i] || "";
-          row.appendChild(td);
-        });
-        tabela.appendChild(row);
+          const row = document.createElement('tr');
+          respostasVisiveis.forEach(res => {
+              const td = document.createElement('td');
+              const conteudo = dados[res]?.[i] || "";
+              td.textContent = conteudo;
+              
+              // Aplicar cores do semáforo se houver conteúdo
+              if (conteudo) {
+                td.setAttribute('data-resposta', res);
+              }
+              
+              // Adicionar alternância de cores nas linhas (apenas para células vazias)
+              if (i % 2 === 0 && !conteudo) {
+                  td.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+              }
+              
+              row.appendChild(td);
+          });
+          tabela.appendChild(row);
       }
 
       container.appendChild(tabela);
@@ -1311,14 +1522,12 @@
       const posicoes = ['Top', 'Switch', 'bottom', 'Sádico', 'Masoquista', 'Fetichista', 'Outros'];
       const dores = ['Muito Baixa', 'Baixa', 'Média', 'Alta', 'Muito Alta', 'N/A'];
       const experiencias = ['0-3 anos', '3-5 anos', '5-7 anos', '7-10 anos', '10+ anos'];
-      const sexualidades = ['Heterossexual', 'Homossexual', 'Bissexual', 'Pansexual', 'Assexual', 'Demissexual', 'Outros'];
       
       const perfilComprimido = [
         posicoes.indexOf(document.getElementById('posicao').value),
         dores.indexOf(document.getElementById('dor').value),
         experiencias.indexOf(document.getElementById('teorica').value),
-        experiencias.indexOf(document.getElementById('pratica').value),
-        sexualidades.indexOf(document.getElementById('sexualidade').value)
+        experiencias.indexOf(document.getElementById('pratica').value)
       ].join(',');
       
       const dadosFinais = `${respostasComprimidas}#${perfilComprimido}`;
@@ -1328,37 +1537,14 @@
     // Verificar resultado compartilhado ao carregar a página
     function verificarResultadoCompartilhado() {
       const hash = window.location.hash;
-      console.log('Hash detectado:', hash);
-      
-      if (hash.startsWith('#dados=')) {
-        try {
-          const dadosBase64 = hash.substring(7);
-          const dadosJson = decodeURIComponent(atob(dadosBase64));
-          const dados = JSON.parse(dadosJson);
-          
-          console.log('Dados JSON carregados:', dados);
-          processarResultadoCompartilhado(dados);
-          return true;
-        } catch (error) {
-          console.error('Erro ao carregar resultado compartilhado:', error);
-          mostrarMensagemErro();
-          return false;
-        }
-      }
       
       if (hash.startsWith('#r=')) {
         try {
           const dadosBase64 = hash.substring(3);
-          console.log('Base64 recebido:', dadosBase64);
-          
           const dadosComprimidos = atob(dadosBase64);
-          console.log('Dados descomprimidos:', dadosComprimidos);
-          
           const dados = descomprimirDados(dadosComprimidos);
-          console.log('Dados finais processados:', dados);
           
           if (dados.respostas.length === 0) {
-            console.error('Nenhuma resposta válida encontrada');
             mostrarMensagemErro();
             return false;
           }
@@ -1366,7 +1552,7 @@
           processarResultadoCompartilhado(dados);
           return true;
         } catch (error) {
-          console.error('Erro ao carregar resultado comprimido:', error);
+          console.error('Erro ao carregar resultado compartilhado:', error);
           mostrarMensagemErro();
           return false;
         }
@@ -1403,7 +1589,6 @@
       const posicoes = ['Top', 'Switch', 'bottom', 'Sádico', 'Masoquista', 'Fetichista', 'Outros'];
       const dores = ['Muito Baixa', 'Baixa', 'Média', 'Alta', 'Muito Alta', 'N/A'];
       const experiencias = ['0-3 anos', '3-5 anos', '5-7 anos', '7-10 anos', '10+ anos'];
-      const sexualidades = ['Heterossexual', 'Homossexual', 'Bissexual', 'Pansexual', 'Assexual', 'Demissexual', 'Outros'];
       
       return {
         respostas: respostas,
@@ -1411,8 +1596,7 @@
           posicao: posicoes[perfilIndices[0]] || 'Top',
           dor: dores[perfilIndices[1]] || 'Média',
           teorica: experiencias[perfilIndices[2]] || '0-3 anos',
-          pratica: experiencias[perfilIndices[3]] || '0-3 anos',
-          sexualidade: sexualidades[perfilIndices[4]] || 'Heterossexual'
+          pratica: experiencias[perfilIndices[3]] || '0-3 anos'
         },
         timestamp: new Date().toISOString()
       };
@@ -1462,21 +1646,21 @@
 
       respostasFiltradas.forEach(r => {
         if (!agrupado[r.categoria]) {
-          agrupado[r.categoria] = { dar: {}, receber: {} };
+          agrupado[r.categoria] = { tipo1: {}, tipo2: {} };
         }
         
         if (r.dar !== 'N/A') {
-          if (!agrupado[r.categoria].dar[r.dar]) {
-            agrupado[r.categoria].dar[r.dar] = [];
+          if (!agrupado[r.categoria].tipo1[r.dar]) {
+            agrupado[r.categoria].tipo1[r.dar] = [];
           }
-          agrupado[r.categoria].dar[r.dar].push(r.pergunta);
+          agrupado[r.categoria].tipo1[r.dar].push(r.pergunta);
         }
         
         if (r.receber !== 'N/A') {
-          if (!agrupado[r.categoria].receber[r.receber]) {
-            agrupado[r.categoria].receber[r.receber] = [];
+          if (!agrupado[r.categoria].tipo2[r.receber]) {
+            agrupado[r.categoria].tipo2[r.receber] = [];
           }
-          agrupado[r.categoria].receber[r.receber].push(r.pergunta);
+          agrupado[r.categoria].tipo2[r.receber].push(r.pergunta);
         }
       });
 
@@ -1517,11 +1701,15 @@
         secao.className = 'resultado-categoria';
         secao.innerHTML = `<h3>📋 ${categoria}</h3>`;
         
-        const tabelaDar = criarTabelaResultado(agrupado[categoria].dar, 'DAR');
-        secao.appendChild(tabelaDar);
+        const classificacao = classificacoesPorCategoria[categoria];
         
-        const tabelaReceber = criarTabelaResultado(agrupado[categoria].receber, 'RECEBER');
-        secao.appendChild(tabelaReceber);
+        if (classificacao) {
+          const tabelaTipo1 = criarTabelaResultado(agrupado[categoria].tipo1, classificacao.tipo1, categoria);
+          secao.appendChild(tabelaTipo1);
+          
+          const tabelaTipo2 = criarTabelaResultado(agrupado[categoria].tipo2, classificacao.tipo2, categoria);
+          secao.appendChild(tabelaTipo2);
+        }
         
         resumo.appendChild(secao);
       }
