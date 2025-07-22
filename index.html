@@ -895,19 +895,35 @@
         return `${catIndex}:${pergIndex}:${darIndex}:${receberIndex}`;
       }).filter(item => item !== null).join('|');
       
-      // Comprimir perfil
+      // Comprimir perfil básico
       const posicoes = ['Top', 'Switch', 'bottom', 'Sádico', 'Masoquista', 'Fetichista', 'Outros'];
       const dores = ['Muito Baixa', 'Baixa', 'Média', 'Alta', 'Muito Alta', 'N/A'];
       const experiencias = ['0-3 anos', '3-5 anos', '5-7 anos', '7-10 anos', '10+ anos'];
       
-      const perfilComprimido = [
+      const perfilBasico = [
         posicoes.indexOf(document.getElementById('posicao').value),
         dores.indexOf(document.getElementById('dor').value),
         experiencias.indexOf(document.getElementById('teorica').value),
         experiencias.indexOf(document.getElementById('pratica').value)
       ].join(',');
+
+      // Comprimir relacionamentos selecionados
+      const relacionamentosSelecionados = Array.from(
+        document.querySelectorAll('.section:nth-child(3) .toggle.active')
+      ).map(btn => btn.textContent);
+
+      // Comprimir locais selecionados
+      const locaisSelecionados = Array.from(
+        document.querySelectorAll('.section:nth-child(4) .toggle.active')
+      ).map(btn => btn.textContent);
+
+      // Dados extras (relacionamentos e locais)
+      const dadosExtras = {
+        rel: relacionamentosSelecionados,
+        loc: locaisSelecionados
+      };
       
-      const dadosFinais = `${respostasComprimidas}#${perfilComprimido}`;
+      const dadosFinais = `${respostasComprimidas}#${perfilBasico}#${btoa(JSON.stringify(dadosExtras))}`;
       return btoa(dadosFinais);
     }
 
@@ -939,7 +955,10 @@
     }
 
     function descomprimirDados(dadosComprimidos) {
-      const [respostasStr, perfilStr] = dadosComprimidos.split('#');
+      const partes = dadosComprimidos.split('#');
+      const respostasStr = partes[0];
+      const perfilStr = partes[1];
+      const extrasStr = partes[2]; // Pode não existir em links antigos
       
       const respostasMap = ['N/A', 'Nunca experimentei', 'Adoro', 'Aproveito', 'Aceito', 'Tolero', 'Limite rígido'];
       const categoriasMap = ['Atos sexuais', 'Bondage', 'Sadismo e Masoquismo', 'Dominação e Submissão', 'Role Play', 'Fetiches', 'Equipamentos'];
@@ -966,6 +985,16 @@
       const posicoes = ['Top', 'Switch', 'bottom', 'Sádico', 'Masoquista', 'Fetichista', 'Outros'];
       const dores = ['Muito Baixa', 'Baixa', 'Média', 'Alta', 'Muito Alta', 'N/A'];
       const experiencias = ['0-3 anos', '3-5 anos', '5-7 anos', '7-10 anos', '10+ anos'];
+
+      // Dados extras (relacionamentos e locais)
+      let dadosExtras = { rel: [], loc: [] };
+      if (extrasStr) {
+        try {
+          dadosExtras = JSON.parse(atob(extrasStr));
+        } catch (error) {
+          console.warn('Erro ao decodificar dados extras:', error);
+        }
+      }
       
       return {
         respostas: respostas,
@@ -973,7 +1002,9 @@
           posicao: posicoes[perfilIndices[0]] || 'Top',
           dor: dores[perfilIndices[1]] || 'Média',
           teorica: experiencias[perfilIndices[2]] || '0-3 anos',
-          pratica: experiencias[perfilIndices[3]] || '0-3 anos'
+          pratica: experiencias[perfilIndices[3]] || '0-3 anos',
+          relacionamentos: dadosExtras.rel || [],
+          locais: dadosExtras.loc || []
         },
         timestamp: new Date().toISOString()
       };
@@ -1051,36 +1082,11 @@
         }
       });
 
+      // Adicionar card completo do perfil compartilhado
+      adicionarPerfilCompartilhadoCompleto(resumo, dados);
+
       // Adicionar estatísticas
       adicionarEstatisticasGerais(resumo, respostasFiltradas);
-
-      // Mostrar perfil compartilhado
-      if (dados.perfil) {
-        const perfilDiv = document.createElement('div');
-        perfilDiv.className = 'estatisticas-gerais';
-        perfilDiv.innerHTML = `
-          <h3>👤 Perfil</h3>
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-label">Posição</div>
-              <div style="font-weight: 600;">${dados.perfil.posicao}</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">Tolerância à Dor</div>
-              <div style="font-weight: 600;">${dados.perfil.dor}</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">Experiência Teórica</div>
-              <div style="font-weight: 600;">${dados.perfil.teorica}</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">Experiência Prática</div>
-              <div style="font-weight: 600;">${dados.perfil.pratica}</div>
-            </div>
-          </div>
-        `;
-        resumo.appendChild(perfilDiv);
-      }
 
       // Adicionar resultados por categoria
       for (const categoria in agrupado) {
@@ -1100,6 +1106,61 @@
         
         resumo.appendChild(secao);
       }
+    }
+
+    function adicionarPerfilCompartilhadoCompleto(container, dados) {
+      // Coletar categorias respondidas
+      const categoriasRespondidas = [...new Set(dados.respostas.map(r => r.categoria))];
+
+      const resumoDiv = document.createElement('div');
+      resumoDiv.className = 'resumo-perfil-selecionado';
+      
+      resumoDiv.innerHTML = `
+        <h3>👤 Seu Perfil</h3>
+        <div class="perfil-grid">
+          <div class="perfil-card">
+            <div class="perfil-icon">🎯</div>
+            <div class="perfil-label">Posição</div>
+            <div class="perfil-valor">${dados.perfil.posicao}</div>
+          </div>
+          <div class="perfil-card">
+            <div class="perfil-icon">⚡</div>
+            <div class="perfil-label">Tolerância à Dor</div>
+            <div class="perfil-valor">${dados.perfil.dor}</div>
+          </div>
+          <div class="perfil-card">
+            <div class="perfil-icon">📚</div>
+            <div class="perfil-label">Experiência Teórica</div>
+            <div class="perfil-valor">${dados.perfil.teorica}</div>
+          </div>
+          <div class="perfil-card">
+            <div class="perfil-icon">🔥</div>
+            <div class="perfil-label">Experiência Prática</div>
+            <div class="perfil-valor">${dados.perfil.pratica}</div>
+          </div>
+        </div>
+
+        ${dados.perfil.relacionamentos && dados.perfil.relacionamentos.length > 0 ? `
+        <h4>💕 Tipos de Relacionamento</h4>
+        <div class="tags-container">
+          ${dados.perfil.relacionamentos.map(rel => `<span class="tag tag-relacionamento">${rel}</span>`).join('')}
+        </div>
+        ` : ''}
+
+        ${dados.perfil.locais && dados.perfil.locais.length > 0 ? `
+        <h4>📍 Locais de Interesse</h4>
+        <div class="tags-container">
+          ${dados.perfil.locais.map(local => `<span class="tag tag-local">${local}</span>`).join('')}
+        </div>
+        ` : ''}
+
+        <h4>📋 Categorias Respondidas</h4>
+        <div class="tags-container">
+          ${categoriasRespondidas.map(cat => `<span class="tag tag-categoria">${cat}</span>`).join('')}
+        </div>
+      `;
+      
+      container.appendChild(resumoDiv);
     }
 
     function mostrarMensagemErro() {
